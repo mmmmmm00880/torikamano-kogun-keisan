@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>集結管制塔・カウントダウン版</title>
+    <title>集結管制塔・自動保存版</title>
     <style>
         :root { --main: #78a355; --bg: #f5f7f5; --accent: #e8f0e8; }
         body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; font-size: 13px; }
@@ -28,25 +28,21 @@
         .btn-add { background: var(--main); color: white; width: 100%; margin-bottom: 15px; font-size: 1rem; }
         .btn-move { background: #eee; color: #666; font-size: 11px; flex: 1; }
         .btn-start { background: #ff7b00; color: white; font-size: 1.2rem; width: 100%; padding: 15px; margin-top: 10px; }
+        .btn-clear { background: #999; color: white; font-size: 0.8rem; margin-top: 20px; width: 100%; padding: 5px; }
         
-        /* タイマーの色をカウントダウン中は変える */
         .timer-display { text-align: center; font-size: 3rem; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; }
-        .counting-down { color: #d32f2f; } /* マイナス中は赤 */
-        .counting-up { color: #333; }    /* 0以降は黒 */
+        .counting-down { color: #d32f2f; }
+        .counting-up { color: #333; }
 
         .target-sec { background: #fff3e0; font-weight: bold; text-align: center; color: #e65100; border-radius: 5px; }
         .active-row { background: #fffde7 !important; border: 2px solid #ffeb3b; }
-        .active-row td { font-weight: bold; color: #000; }
-        
-        /* 0秒の時の強調 */
-        .zero-moment { background: #ff5252 !important; color: white !important; animation: blink 0.5s step-end infinite; }
-        @keyframes blink { 50% { opacity: 0.7; } }
+        .zero-moment { background: #ff5252 !important; color: white !important; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>集結管制塔（-3, -2, -1, 0...）</h1>
+    <h1>集結管制塔（自動保存なのだ！）</h1>
     
     <div class="timer-display counting-down" id="mainTimer">-3</div>
 
@@ -67,21 +63,55 @@
 
     <button class="btn btn-add" onclick="addRow()">＋ 集結枠を追加するのだ</button>
     <button class="btn btn-start" onclick="toggleTimer()" id="startBtn">カウント開始なのだ！</button>
+    <button class="btn btn-clear" onclick="clearData()">全データを消去してリセットなのだ</button>
 </div>
 
 <script>
     let timerId = null;
-    let count = -3; // -3秒からスタート
+    let count = -3;
 
-    function addRow() {
+    // --- 保存・復元のロジック ---
+    function saveData() {
+        const rows = Array.from(document.querySelectorAll('#tableBody tr'));
+        const data = rows.map(row => {
+            const inputs = row.querySelectorAll('input');
+            return {
+                name: inputs[0].value,
+                alliance: inputs[1].value,
+                memo: inputs[2].value,
+                time: inputs[3].value
+            };
+        });
+        localStorage.setItem('rallyData', JSON.stringify(data));
+    }
+
+    function loadData() {
+        const saved = localStorage.getItem('rallyData');
+        if (saved) {
+            const data = JSON.parse(saved);
+            data.forEach(item => addRow(item));
+        } else {
+            for(let i=0; i<3; i++) addRow();
+        }
+    }
+
+    function clearData() {
+        if(confirm("本当に入力内容をすべて消すのだ？")) {
+            localStorage.removeItem('rallyData');
+            location.reload();
+        }
+    }
+
+    // --- 基本機能 ---
+    function addRow(item = {name:'', alliance:'', memo:'', time:40}) {
         const tbody = document.getElementById('tableBody');
         const row = document.createElement('tr');
         row.innerHTML = `
             <td class="col-order order"></td>
-            <td class="col-input"><input type="text" placeholder="名前"></td>
-            <td class="col-input"><input type="text" placeholder="同盟"></td>
-            <td class="col-input"><input type="text" placeholder="備考"></td>
-            <td class="col-time"><input type="number" class="time-input" value="40" oninput="updateCalculations()"></td>
+            <td class="col-input"><input type="text" value="${item.name}" oninput="saveData()" placeholder="名前"></td>
+            <td class="col-input"><input type="text" value="${item.alliance}" oninput="saveData()" placeholder="同盟"></td>
+            <td class="col-input"><input type="text" value="${item.memo}" oninput="saveData()" placeholder="備考"></td>
+            <td class="col-time"><input type="number" class="time-input" value="${item.time}" oninput="updateCalculations(); saveData()"></td>
             <td class="col-wait target-sec">-</td>
             <td class="col-ctrl">
                 <div class="btn-group">
@@ -98,6 +128,7 @@
     function removeRow(btn) {
         btn.closest('tr').remove();
         updateCalculations();
+        saveData();
     }
 
     function updateCalculations() {
@@ -123,12 +154,12 @@
             tbody.insertBefore(row.nextElementSibling, row);
         }
         updateCalculations();
+        saveData();
     }
 
     function toggleTimer() {
         const btn = document.getElementById('startBtn');
         const display = document.getElementById('mainTimer');
-        
         if (timerId) {
             clearInterval(timerId);
             timerId = null;
@@ -151,13 +182,7 @@
     function updateDisplay() {
         const display = document.getElementById('mainTimer');
         display.innerText = count;
-        
-        // 色分け
-        if (count < 0) {
-            display.className = "timer-display counting-down";
-        } else {
-            display.className = "timer-display counting-up";
-        }
+        display.className = count < 0 ? "timer-display counting-down" : "timer-display counting-up";
 
         const rows = document.querySelectorAll('#tableBody tr');
         rows.forEach(row => {
@@ -172,7 +197,8 @@
         });
     }
 
-    for(let i=0; i<3; i++) addRow();
+    // 読み込み時に実行
+    loadData();
 </script>
 
 </body>
