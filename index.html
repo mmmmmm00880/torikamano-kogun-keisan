@@ -3,40 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>秒数計算ツールなのだ</title>
+    <title>集結管制塔・ずんだもんエディション</title>
     <style>
-        :root { --main-color: #78a355; --bg-color: #f0f4f0; }
-        body { font-family: "Helvetica Neue", Arial, sans-serif; background-color: var(--bg-color); color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; width: 90%; max-width: 400px; }
-        h1 { font-size: 1.2rem; color: var(--main-color); margin-bottom: 20px; }
-        input { width: 100%; padding: 15px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; margin-bottom: 15px; outline: none; }
-        input:focus { border-color: var(--main-color); }
-        button { width: 100%; padding: 15px; background-color: var(--main-color); color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:active { transform: scale(0.98); }
-        #result { margin-top: 25px; padding: 15px; background: #f9f9f9; border-radius: 10px; min-height: 1.5em; font-size: 1.1rem; color: #2e7d32; }
+        :root { --main: #78a355; --bg: #f5f7f5; --accent: #e8f0e8; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 15px; font-size: 14px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { font-size: 1.2rem; color: var(--main); text-align: center; }
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+        th { font-size: 0.8rem; background: var(--accent); color: #555; padding: 8px; border-bottom: 2px solid white; }
+        td { padding: 5px; border-bottom: 1px solid #eee; }
+        
+        input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        .time-input { font-weight: bold; color: var(--main); text-align: center; }
+        
+        .btn-group { display: flex; gap: 5px; justify-content: center; }
+        .btn { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-add { background: var(--main); color: white; width: 100%; margin-bottom: 20px; }
+        .btn-move { background: #eee; color: #666; font-size: 12px; }
+        .btn-start { background: #ff7b00; color: white; font-size: 1.2rem; width: 100%; padding: 15px; }
+        
+        .timer-display { text-align: center; font-size: 2rem; font-weight: bold; margin: 15px 0; color: #333; }
+        .target-sec { background: #fff3e0; font-weight: bold; text-align: center; color: #e65100; }
+        .active-row { background: #fff9c4 !important; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>秒数計算ツールなのだ！</h1>
-    <input type="number" id="secInput" placeholder="秒数を入力 (例: 150)" inputmode="numeric">
-    <button onclick="calc()">計算するのだ</button>
-    <div id="result">数値を入力してね</div>
+    <h1>集結管制塔なのだ！</h1>
+    
+    <div class="timer-display" id="mainTimer">00</div>
+
+    <table id="rallyTable">
+        <thead>
+            <tr>
+                <th>順</th>
+                <th>集結主/同盟/備考</th>
+                <th>行軍秒</th>
+                <th>待機秒</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+    </table>
+
+    <button class="btn btn-add" onclick="addRow()">＋ 集結枠を追加するのだ</button>
+    <button class="btn btn-start" onclick="toggleTimer()" id="startBtn">カウント開始なのだ！</button>
 </div>
 
 <script>
-    function calc() {
-        const input = document.getElementById('secInput');
-        const sec = parseInt(input.value);
-        if (isNaN(sec)) {
-            document.getElementById('result').innerText = "数値を入力するのだ！";
-            return;
-        }
-        const m = Math.floor(sec / 60);
-        const s = sec % 60;
-        document.getElementById('result').innerHTML = `<strong>${sec}秒</strong> は<br><strong>${m}分${s}秒</strong> なのだ！`;
+    let timerId = null;
+    let elapsed = 0;
+
+    function addRow() {
+        const tbody = document.getElementById('tableBody');
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="order"></td>
+            <td><input type="text" placeholder="名前/メモ"></td>
+            <td><input type="number" class="time-input" value="60" oninput="updateCalculations()"></td>
+            <td class="target-sec">-</td>
+            <td>
+                <div class="btn-group">
+                    <button class="btn btn-move" onclick="moveRow(this, -1)">↑</button>
+                    <button class="btn btn-move" onclick="moveRow(this, 1)">↓</button>
+                    <button class="btn btn-move" style="color:red" onclick="this.parentElement.parentElement.parentElement.remove(); updateCalculations();">×</button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+        updateCalculations();
     }
+
+    function updateCalculations() {
+        const rows = Array.from(document.querySelectorAll('#tableBody tr'));
+        const times = rows.map(r => parseInt(r.querySelector('.time-input').value) || 0);
+        const maxTime = Math.max(...times, 0);
+
+        rows.forEach((row, index) => {
+            row.querySelector('.order').innerText = index + 1;
+            const myTime = parseInt(row.querySelector('.time-input').value) || 0;
+            // 計算：(最大行軍 + 順番) - 自分の行軍
+            const waitTime = (maxTime + index) - myTime;
+            row.querySelector('.target-sec').innerText = waitTime + "秒後";
+            row.dataset.wait = waitTime;
+        });
+    }
+
+    function moveRow(btn, direction) {
+        const row = btn.parentElement.parentElement.parentElement;
+        const tbody = document.getElementById('tableBody');
+        if (direction === -1 && row.previousElementSibling) {
+            tbody.insertBefore(row, row.previousElementSibling);
+        } else if (direction === 1 && row.nextElementSibling) {
+            tbody.insertBefore(row.nextElementSibling, row);
+        }
+        updateCalculations();
+    }
+
+    function toggleTimer() {
+        const btn = document.getElementById('startBtn');
+        if (timerId) {
+            clearInterval(timerId);
+            timerId = null;
+            btn.innerText = "カウント開始なのだ！";
+            btn.style.background = "#ff7b00";
+        } else {
+            elapsed = 0;
+            updateDisplay();
+            btn.innerText = "リセットなのだ！";
+            btn.style.background = "#666";
+            timerId = setInterval(() => {
+                elapsed++;
+                updateDisplay();
+            }, 1000);
+        }
+    }
+
+    function updateDisplay() {
+        document.getElementById('mainTimer').innerText = elapsed;
+        const rows = document.querySelectorAll('#tableBody tr');
+        rows.forEach(row => {
+            if (parseInt(row.dataset.wait) === elapsed) {
+                row.classList.add('active-row');
+            } else {
+                row.classList.remove('active-row');
+            }
+        });
+    }
+
+    // 最初は3行くらい出しておく
+    for(let i=0; i<3; i++) addRow();
 </script>
 
 </body>
