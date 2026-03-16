@@ -6,26 +6,34 @@
     <title>集結管制塔・ずんだもんエディション</title>
     <style>
         :root { --main: #78a355; --bg: #f5f7f5; --accent: #e8f0e8; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 15px; font-size: 14px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h1 { font-size: 1.2rem; color: var(--main); text-align: center; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; font-size: 13px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h1 { font-size: 1.2rem; color: var(--main); text-align: center; margin-top: 5px; }
         
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        th { font-size: 0.8rem; background: var(--accent); color: #555; padding: 8px; border-bottom: 2px solid white; }
-        td { padding: 5px; border-bottom: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; table-layout: fixed; }
+        th { font-size: 0.75rem; background: var(--accent); color: #555; padding: 8px 4px; border-bottom: 2px solid white; }
+        td { padding: 4px; border-bottom: 1px solid #eee; overflow: hidden; }
         
-        input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; }
+        /* 列の幅調整 */
+        .col-order { width: 25px; text-align: center; }
+        .col-input { width: auto; }
+        .col-time { width: 55px; }
+        .col-wait { width: 55px; }
+        .col-ctrl { width: 85px; }
+
+        input { width: 100%; padding: 8px 4px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 13px; }
         .time-input { font-weight: bold; color: var(--main); text-align: center; }
         
-        .btn-group { display: flex; gap: 5px; justify-content: center; }
-        .btn { padding: 8px 12px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-add { background: var(--main); color: white; width: 100%; margin-bottom: 20px; }
-        .btn-move { background: #eee; color: #666; font-size: 12px; }
-        .btn-start { background: #ff7b00; color: white; font-size: 1.2rem; width: 100%; padding: 15px; }
+        .btn-group { display: flex; gap: 3px; justify-content: center; }
+        .btn { padding: 8px 5px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .btn-add { background: var(--main); color: white; width: 100%; margin-bottom: 15px; font-size: 1rem; }
+        .btn-move { background: #eee; color: #666; font-size: 11px; flex: 1; }
+        .btn-start { background: #ff7b00; color: white; font-size: 1.2rem; width: 100%; padding: 15px; margin-top: 10px; }
         
-        .timer-display { text-align: center; font-size: 2rem; font-weight: bold; margin: 15px 0; color: #333; }
-        .target-sec { background: #fff3e0; font-weight: bold; text-align: center; color: #e65100; }
+        .timer-display { text-align: center; font-size: 2.5rem; font-weight: bold; margin: 10px 0; color: #333; font-variant-numeric: tabular-nums; }
+        .target-sec { background: #fff3e0; font-weight: bold; text-align: center; color: #e65100; border-radius: 5px; }
         .active-row { background: #fff9c4 !important; }
+        .active-row input { background: #fffde7; }
     </style>
 </head>
 <body>
@@ -38,11 +46,13 @@
     <table id="rallyTable">
         <thead>
             <tr>
-                <th>順</th>
-                <th>集結主/同盟/備考</th>
-                <th>行軍秒</th>
-                <th>待機秒</th>
-                <th>操作</th>
+                <th class="col-order">順</th>
+                <th class="col-input">集結主</th>
+                <th class="col-input">同盟</th>
+                <th class="col-input">備考</th>
+                <th class="col-time">行軍秒</th>
+                <th class="col-wait">待機秒</th>
+                <th class="col-ctrl">操作</th>
             </tr>
         </thead>
         <tbody id="tableBody">
@@ -61,15 +71,17 @@
         const tbody = document.getElementById('tableBody');
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td class="order"></td>
-            <td><input type="text" placeholder="名前/メモ"></td>
-            <td><input type="number" class="time-input" value="60" oninput="updateCalculations()"></td>
-            <td class="target-sec">-</td>
-            <td>
+            <td class="col-order order"></td>
+            <td class="col-input"><input type="text" placeholder="名前"></td>
+            <td class="col-input"><input type="text" placeholder="同盟"></td>
+            <td class="col-input"><input type="text" placeholder="備考"></td>
+            <td class="col-time"><input type="number" class="time-input" value="60" oninput="updateCalculations()"></td>
+            <td class="col-wait target-sec">-</td>
+            <td class="col-ctrl">
                 <div class="btn-group">
                     <button class="btn btn-move" onclick="moveRow(this, -1)">↑</button>
                     <button class="btn btn-move" onclick="moveRow(this, 1)">↓</button>
-                    <button class="btn btn-move" style="color:red" onclick="this.parentElement.parentElement.parentElement.remove(); updateCalculations();">×</button>
+                    <button class="btn btn-move" style="color:red" onclick="removeRow(this)">×</button>
                 </div>
             </td>
         `;
@@ -77,23 +89,28 @@
         updateCalculations();
     }
 
+    function removeRow(btn) {
+        btn.closest('tr').remove();
+        updateCalculations();
+    }
+
     function updateCalculations() {
         const rows = Array.from(document.querySelectorAll('#tableBody tr'));
         const times = rows.map(r => parseInt(r.querySelector('.time-input').value) || 0);
-        const maxTime = Math.max(...times, 0);
+        const maxTime = times.length > 0 ? Math.max(...times) : 0;
 
         rows.forEach((row, index) => {
             row.querySelector('.order').innerText = index + 1;
             const myTime = parseInt(row.querySelector('.time-input').value) || 0;
             // 計算：(最大行軍 + 順番) - 自分の行軍
             const waitTime = (maxTime + index) - myTime;
-            row.querySelector('.target-sec').innerText = waitTime + "秒後";
+            row.querySelector('.target-sec').innerText = waitTime + "秒";
             row.dataset.wait = waitTime;
         });
     }
 
     function moveRow(btn, direction) {
-        const row = btn.parentElement.parentElement.parentElement;
+        const row = btn.closest('tr');
         const tbody = document.getElementById('tableBody');
         if (direction === -1 && row.previousElementSibling) {
             tbody.insertBefore(row, row.previousElementSibling);
@@ -123,7 +140,7 @@
     }
 
     function updateDisplay() {
-        document.getElementById('mainTimer').innerText = elapsed;
+        document.getElementById('mainTimer').innerText = elapsed.toString().padStart(2, '0');
         const rows = document.querySelectorAll('#tableBody tr');
         rows.forEach(row => {
             if (parseInt(row.dataset.wait) === elapsed) {
@@ -134,7 +151,7 @@
         });
     }
 
-    // 最初は3行くらい出しておく
+    // 初期状態で3行追加
     for(let i=0; i<3; i++) addRow();
 </script>
 
