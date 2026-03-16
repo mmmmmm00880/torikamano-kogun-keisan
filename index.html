@@ -8,7 +8,18 @@
         :root { --main: #78a355; --bg: #f5f7f5; --accent: #e8f0e8; }
         body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; font-size: 13px; }
         .container { max-width: 800px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h1 { font-size: 1.1rem; color: var(--main); text-align: center; margin-bottom: 15px; }
+        
+        /* タイトルと説明文の中央寄せ設定なのだ */
+        h1 { font-size: 1.1rem; color: var(--main); text-align: center; margin-bottom: 5px; }
+        h2 { 
+            font-size: 0.75rem; 
+            color: #888; 
+            font-weight: normal; 
+            text-align: center; 
+            margin: 0 auto 15px; 
+            line-height: 1.4;
+            max-width: 90%;
+        }
         
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; table-layout: fixed; }
         th { font-size: 0.65rem; background: var(--accent); color: #555; padding: 8px 2px; }
@@ -18,7 +29,7 @@
         .col-no    { width: 25px; }
         .col-name  { width: 85px; } 
         .col-all   { width: 45px; } 
-        .col-memo  { width: auto; } /* 備考は可変 */
+        .col-memo  { width: auto; }
         .col-target { width: 40px; } 
         .col-time  { width: 45px; } 
         .col-wait  { width: 40px; } 
@@ -44,7 +55,8 @@
 
 <div class="container">
     <h1>集結カウント計算</h1>
-    <h2>集結主名・着弾順・行軍秒数を入力すると、待機の列にカウント数が出ます。</h2>
+    <h2>各項目を入力すると「待機」にカウント数が出ます。<br>カウント開始後、自分の数値になったら発射なのだ！</h2>
+    
     <div class="timer-display" id="mainTimer">-3</div>
 
     <table id="rallyTable">
@@ -77,7 +89,6 @@
     function addRow(data = {name:'', all:'', memo:'', target:1, time:40}) {
         const tbody = document.getElementById('tableBody');
         const row = document.createElement('tr');
-        // デフォルト着弾秒は、現在の行数を目安に自動セット
         const defaultTarget = data.target || (tbody.children.length + 1);
         
         row.innerHTML = `
@@ -96,7 +107,6 @@
 
     function update() {
         const rows = Array.from(document.querySelectorAll('#tableBody tr'));
-        
         const rowData = rows.map(row => {
             const inputs = row.querySelectorAll('input');
             return {
@@ -108,8 +118,6 @@
             };
         });
 
-        // 正しい計算：全員が「着弾目標秒」に届くために必要な、全体の基準時刻を求める
-        // (行軍時間 + 着弾目標) が最大になる人を「最も早く出発すべき人」として、その出発を待機0秒とする
         let maxLaunchRef = 0;
         rowData.forEach(d => {
             if (d.time + d.target > maxLaunchRef) maxLaunchRef = d.time + d.target;
@@ -119,11 +127,7 @@
         rows.forEach((row, i) => {
             row.querySelector('.col-no').innerText = i + 1;
             const d = rowData[i];
-            
-            // 待機秒 ＝ 全体基準 － (自分の行軍時間 ＋ 自分の着弾目標)
-            // ではなく、シンプルに「目標に着弾させるために必要な出発時間」を逆算
             const wait = maxLaunchRef - (d.time + d.target);
-            
             row.querySelector('.wait-display').innerText = wait;
             row.dataset.wait = wait;
             copyStr += `${i+1}.${d.name||'--'}(${d.all||'--'}) ${d.memo? d.memo+' ':''}待機:${wait}秒\n`;
@@ -164,7 +168,6 @@
         alert("コピーしたのだ！");
     }
 
-    // 初期読み込み
     const saved = localStorage.getItem('rallyFinalSimple');
     if (saved) JSON.parse(saved).forEach(d => addRow(d));
     else for(let i=0; i<3; i++) addRow({name:'', all:'', memo:'', target:i+1, time:40});
