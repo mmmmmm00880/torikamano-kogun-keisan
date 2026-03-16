@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>秒数計算ツールなのだ</title>
+    <style>
+        :root { --main-color: #78a355; --bg-color: #f0f4f0; }
+        body { font-family: "Helvetica Neue", Arial, sans-serif; background-color: var(--bg-color); color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; width: 90%; max-width: 400px; }
+        h1 { font-size: 1.2rem; color: var(--main-color); margin-bottom: 20px; }
+        input { width: 100%; padding: 15px; font-size: 1.1rem; border: 2px solid #ddd; border-radius: 10px; box-sizing: border-box; margin-bottom: 15px; outline: none; }
+        input:focus { border-color: var(--main-color); }
+        button { width: 100%; padding: 15px; background-color: var(--main-color); color: white; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:active { transform: scale(0.98); }
+        #result { margin-top: 25px; padding: 15px; background: #f9f9f9; border-radius: 10px; min-height: 1.5em; font-size: 1.1rem; color: #2e7d32; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>秒数計算ツールなのだ！</h1>
+    <input type="number" id="secInput" placeholder="秒数を入力 (例: 150)" inputmode="numeric">
+    <button onclick="calc()">計算するのだ</button>
+    <div id="result">数値を入力してね</div>
+</div>
+
+<script>
+    function calc() {
+        const input = document.getElementById('secInput');
+        const sec = parseInt(input.value);
+        if (isNaN(sec)) {
+            document.getElementById('result').innerText = "数値を入力するのだ！";
+            return;
+        }
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        document.getElementById('result').innerHTML = `<strong>${sec}秒</strong> は<br><strong>${m}分${s}秒</strong> なのだ！`;
+    }
+</script>
+
+</body>
+</html>
