@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>集結管制塔・自動保存版</title>
+    <title>集結管制塔・コピペ機能付き</title>
     <style>
         :root { --main: #78a355; --bg: #f5f7f5; --accent: #e8f0e8; }
         body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; font-size: 13px; }
@@ -28,21 +28,26 @@
         .btn-add { background: var(--main); color: white; width: 100%; margin-bottom: 15px; font-size: 1rem; }
         .btn-move { background: #eee; color: #666; font-size: 11px; flex: 1; }
         .btn-start { background: #ff7b00; color: white; font-size: 1.2rem; width: 100%; padding: 15px; margin-top: 10px; }
-        .btn-clear { background: #999; color: white; font-size: 0.8rem; margin-top: 20px; width: 100%; padding: 5px; }
         
+        /* コピペエリアのスタイル */
+        .copy-section { margin-top: 30px; padding: 15px; background: #fafafa; border: 1px dashed #ccc; border-radius: 10px; }
+        .copy-section h2 { font-size: 0.9rem; margin-top: 0; color: #666; }
+        #copyArea { width: 100%; height: 150px; border: 1px solid #eee; border-radius: 5px; padding: 10px; box-sizing: border-box; font-family: monospace; font-size: 12px; background: white; white-space: pre-wrap; }
+        .btn-copy { background: #5c6bc0; color: white; width: 100%; margin-top: 10px; padding: 10px; }
+
         .timer-display { text-align: center; font-size: 3rem; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; }
         .counting-down { color: #d32f2f; }
         .counting-up { color: #333; }
-
         .target-sec { background: #fff3e0; font-weight: bold; text-align: center; color: #e65100; border-radius: 5px; }
         .active-row { background: #fffde7 !important; border: 2px solid #ffeb3b; }
         .zero-moment { background: #ff5252 !important; color: white !important; }
+        .btn-clear { background: #999; color: white; font-size: 0.8rem; margin-top: 20px; width: 100%; padding: 5px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>集結管制塔（自動保存なのだ！）</h1>
+    <h1>集結管制塔（コピペ機能付き）</h1>
     
     <div class="timer-display counting-down" id="mainTimer">-3</div>
 
@@ -63,14 +68,20 @@
 
     <button class="btn btn-add" onclick="addRow()">＋ 集結枠を追加するのだ</button>
     <button class="btn btn-start" onclick="toggleTimer()" id="startBtn">カウント開始なのだ！</button>
-    <button class="btn btn-clear" onclick="clearData()">全データを消去してリセットなのだ</button>
+
+    <div class="copy-section">
+        <h2>チャット用コピペなのだ</h2>
+        <div id="copyArea" readonly></div>
+        <button class="btn btn-copy" onclick="copyToClipboard()">テキストをコピーするのだ</button>
+    </div>
+
+    <button class="btn btn-clear" onclick="clearData()">全消去リセット</button>
 </div>
 
 <script>
     let timerId = null;
     let count = -3;
 
-    // --- 保存・復元のロジック ---
     function saveData() {
         const rows = Array.from(document.querySelectorAll('#tableBody tr'));
         const data = rows.map(row => {
@@ -83,6 +94,7 @@
             };
         });
         localStorage.setItem('rallyData', JSON.stringify(data));
+        updateCopyText(); // 保存のタイミングでテキストも更新
     }
 
     function loadData() {
@@ -95,14 +107,6 @@
         }
     }
 
-    function clearData() {
-        if(confirm("本当に入力内容をすべて消すのだ？")) {
-            localStorage.removeItem('rallyData');
-            location.reload();
-        }
-    }
-
-    // --- 基本機能 ---
     function addRow(item = {name:'', alliance:'', memo:'', time:40}) {
         const tbody = document.getElementById('tableBody');
         const row = document.createElement('tr');
@@ -125,12 +129,6 @@
         updateCalculations();
     }
 
-    function removeRow(btn) {
-        btn.closest('tr').remove();
-        updateCalculations();
-        saveData();
-    }
-
     function updateCalculations() {
         const rows = Array.from(document.querySelectorAll('#tableBody tr'));
         const times = rows.map(r => parseInt(r.querySelector('.time-input').value) || 0);
@@ -143,6 +141,37 @@
             row.querySelector('.target-sec').innerText = waitTime;
             row.dataset.wait = waitTime;
         });
+        updateCopyText();
+    }
+
+    function updateCopyText() {
+        const rows = Array.from(document.querySelectorAll('#tableBody tr'));
+        let text = "着弾順\n";
+        rows.forEach((row, index) => {
+            const inputs = row.querySelectorAll('input');
+            const name = inputs[0].value || "（未入力）";
+            const alliance = inputs[1].value || "---";
+            const memo = inputs[2].value || "---";
+            const myTime = inputs[3].value;
+            const waitTime = row.dataset.wait;
+
+            text += `${index + 1}.${name}　待機:${waitTime}秒 (行軍:${myTime}秒)\n`;
+            text += `${alliance}・${memo}\n`;
+        });
+        document.getElementById('copyArea').innerText = text;
+    }
+
+    function copyToClipboard() {
+        const text = document.getElementById('copyArea').innerText;
+        navigator.clipboard.writeText(text).then(() => {
+            alert("コピーしたのだ！チャットに貼り付けてね。");
+        });
+    }
+
+    function removeRow(btn) {
+        btn.closest('tr').remove();
+        updateCalculations();
+        saveData();
     }
 
     function moveRow(btn, direction) {
@@ -165,7 +194,6 @@
             timerId = null;
             count = -3;
             display.innerText = count;
-            display.className = "timer-display counting-down";
             btn.innerText = "カウント開始なのだ！";
             btn.style.background = "#ff7b00";
             updateDisplay();
@@ -183,7 +211,6 @@
         const display = document.getElementById('mainTimer');
         display.innerText = count;
         display.className = count < 0 ? "timer-display counting-down" : "timer-display counting-up";
-
         const rows = document.querySelectorAll('#tableBody tr');
         rows.forEach(row => {
             const waitValue = parseInt(row.dataset.wait);
@@ -197,7 +224,13 @@
         });
     }
 
-    // 読み込み時に実行
+    function clearData() {
+        if(confirm("本当に入力内容をすべて消すのだ？")) {
+            localStorage.removeItem('rallyData');
+            location.reload();
+        }
+    }
+
     loadData();
 </script>
 
