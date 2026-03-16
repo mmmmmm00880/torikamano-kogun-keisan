@@ -3,32 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>集結管制塔・シンプル版</title>
+    <title>集結管制塔・完全版</title>
     <style>
         :root { --main: #78a355; --bg: #f5f7f5; --accent: #e8f0e8; }
         body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; font-size: 13px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .container { max-width: 800px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h1 { font-size: 1.1rem; color: var(--main); text-align: center; margin-bottom: 15px; }
         
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; table-layout: fixed; }
-        th { font-size: 0.7rem; background: var(--accent); color: #555; padding: 8px 2px; }
+        th { font-size: 0.65rem; background: var(--accent); color: #555; padding: 8px 2px; }
         td { padding: 4px 2px; border-bottom: 1px solid #eee; text-align: center; }
         
         /* 列の幅指定 */
         .col-no    { width: 25px; }
-        .col-name  { width: 85px; } /* 6文字程度 */
-        .col-all   { width: 40px; } /* 3文字 */
-        .col-target { width: 40px; } /* 着弾順(秒) */
-        .col-time  { width: 45px; } /* 行軍(40s) */
-        .col-wait  { width: 45px; } /* 計算結果 */
-        .col-del   { width: 35px; } /* 削除 */
+        .col-name  { width: 85px; } 
+        .col-all   { width: 45px; } 
+        .col-memo  { width: auto; } /* 備考は可変 */
+        .col-target { width: 40px; } 
+        .col-time  { width: 45px; } 
+        .col-wait  { width: 40px; } 
+        .col-del   { width: 35px; }
 
         input { width: 100%; padding: 8px 2px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 12px; text-align: center; }
         .wait-display { font-weight: bold; color: #e65100; background: #fff3e0; border-radius: 5px; padding: 5px 0; display: block; }
         
         .btn { border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-add { background: var(--main); color: white; width: 100%; padding: 10px; margin-bottom: 10px; font-size: 1rem; }
-        .btn-start { background: #ff7b00; color: white; width: 100%; padding: 15px; font-size: 1.2rem; }
+        .btn-start { background: #ff7b00; color: white; width: 100%; padding: 15px; font-size: 1.2rem; margin-top: 10px; }
         .btn-del { background: #ffcdd2; color: #c62828; width: 100%; padding: 5px 0; }
         
         .timer-display { text-align: center; font-size: 3rem; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; }
@@ -42,7 +43,7 @@
 <body>
 
 <div class="container">
-    <h1>集結管制塔なのだ！</h1>
+    <h1>集結管制塔</h1>
     <div class="timer-display" id="mainTimer">-3</div>
 
     <table id="rallyTable">
@@ -51,6 +52,7 @@
                 <th class="col-no">No</th>
                 <th class="col-name">集結主</th>
                 <th class="col-all">同盟</th>
+                <th class="col-memo">備考</th>
                 <th class="col-target">着弾</th>
                 <th class="col-time">行軍</th>
                 <th class="col-wait">待機</th>
@@ -60,26 +62,30 @@
         <tbody id="tableBody"></tbody>
     </table>
 
-    <button class="btn btn-add" onclick="addRow()">＋ 枠を追加</button>
+    <button class="btn btn-add" onclick="addRow()">＋ 枠を追加するのだ</button>
     <button class="btn btn-start" onclick="toggleTimer()" id="startBtn">カウント開始！</button>
 
     <div class="copy-area" id="copyText"></div>
-    <button class="btn btn-copy" onclick="copyText()">テキストをコピー</button>
+    <button class="btn btn-copy" onclick="copyText()">テキストをコピーするのだ</button>
 </div>
 
 <script>
     let timerId = null;
     let count = -3;
 
-    function addRow(data = {name:'', all:'', target:0, time:40}) {
+    function addRow(data = {name:'', all:'', memo:'', target:1, time:40}) {
         const tbody = document.getElementById('tableBody');
         const row = document.createElement('tr');
+        // デフォルト着弾秒は、現在の行数を目安に自動セット
+        const defaultTarget = data.target || (tbody.children.length + 1);
+        
         row.innerHTML = `
             <td class="col-no"></td>
-            <td class="col-name"><input type="text" value="${data.name}" placeholder="6文字" oninput="update()"></td>
+            <td class="col-name"><input type="text" value="${data.name}" placeholder="名前" oninput="update()"></td>
             <td class="col-all"><input type="text" value="${data.all}" placeholder="ABC" oninput="update()"></td>
-            <td class="col-target"><input type="number" value="${data.target}" oninput="update()"></td>
-            <td class="col-time"><input type="number" value="${data.time}" oninput="update()"></td>
+            <td class="col-memo"><input type="text" value="${data.memo}" placeholder="備考" oninput="update()"></td>
+            <td class="col-target"><input type="number" value="${defaultTarget}" min="0" oninput="update()"></td>
+            <td class="col-time"><input type="number" value="${data.time}" min="1" oninput="update()"></td>
             <td class="col-wait"><span class="wait-display">-</span></td>
             <td class="col-del"><button class="btn btn-del" onclick="this.closest('tr').remove(); update()">×</button></td>
         `;
@@ -90,40 +96,56 @@
     function update() {
         const rows = Array.from(document.querySelectorAll('#tableBody tr'));
         
-        // 待機秒の計算
-        let maxRef = 0;
-        const data = rows.map(row => {
+        const rowData = rows.map(row => {
             const inputs = row.querySelectorAll('input');
-            const d = { name: inputs[0].value, all: inputs[1].value, target: parseInt(inputs[2].value)||0, time: parseInt(inputs[3].value)||0 };
-            if (d.time + d.target > maxRef) maxRef = d.time + d.target;
-            return d;
+            return {
+                name: inputs[0].value,
+                all: inputs[1].value,
+                memo: inputs[2].value,
+                target: parseInt(inputs[3].value) || 0,
+                time: parseInt(inputs[4].value) || 0
+            };
+        });
+
+        // 正しい計算：全員が「着弾目標秒」に届くために必要な、全体の基準時刻を求める
+        // (行軍時間 + 着弾目標) が最大になる人を「最も早く出発すべき人」として、その出発を待機0秒とする
+        let maxLaunchRef = 0;
+        rowData.forEach(d => {
+            if (d.time + d.target > maxLaunchRef) maxLaunchRef = d.time + d.target;
         });
 
         let copyStr = "着弾スケジュール\n";
         rows.forEach((row, i) => {
             row.querySelector('.col-no').innerText = i + 1;
-            const wait = maxRef - data[i].time;
+            const d = rowData[i];
+            
+            // 待機秒 ＝ 全体基準 － (自分の行軍時間 ＋ 自分の着弾目標)
+            // ではなく、シンプルに「目標に着弾させるために必要な出発時間」を逆算
+            const wait = maxLaunchRef - (d.time + d.target);
+            
             row.querySelector('.wait-display').innerText = wait;
             row.dataset.wait = wait;
-            copyStr += `${i+1}.${data[i].name||'--'}(${data[i].all||'--'}) 待機:${wait}秒\n`;
+            copyStr += `${i+1}.${d.name||'--'}(${d.all||'--'}) ${d.memo? d.memo+' ':''}待機:${wait}秒\n`;
         });
         
         document.getElementById('copyText').innerText = copyStr;
-        localStorage.setItem('rallySimple', JSON.stringify(data));
+        localStorage.setItem('rallyFinalSimple', JSON.stringify(rowData));
     }
 
     function toggleTimer() {
         const btn = document.getElementById('startBtn');
+        const display = document.getElementById('mainTimer');
         if (timerId) {
             clearInterval(timerId); timerId = null; count = -3;
             btn.innerText = "カウント開始！"; btn.style.background = "#ff7b00";
-            document.getElementById('mainTimer').innerText = count;
+            display.innerText = count;
+            display.className = "timer-display";
         } else {
             btn.innerText = "リセット"; btn.style.background = "#666";
             timerId = setInterval(() => {
                 count++;
-                document.getElementById('mainTimer').innerText = count;
-                document.getElementById('mainTimer').className = count < 0 ? "timer-display counting-down" : "timer-display";
+                display.innerText = count;
+                display.className = count < 0 ? "timer-display counting-down" : "timer-display";
                 document.querySelectorAll('#tableBody tr').forEach(r => {
                     r.classList.toggle('active-row', parseInt(r.dataset.wait) === count);
                 });
@@ -132,14 +154,19 @@
     }
 
     function copyText() {
-        navigator.clipboard.writeText(document.getElementById('copyText').innerText);
+        const area = document.createElement('textarea');
+        area.value = document.getElementById('copyText').innerText;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand('copy');
+        document.body.removeChild(area);
         alert("コピーしたのだ！");
     }
 
     // 初期読み込み
-    const saved = localStorage.getItem('rallySimple');
+    const saved = localStorage.getItem('rallyFinalSimple');
     if (saved) JSON.parse(saved).forEach(d => addRow(d));
-    else for(let i=0; i<3; i++) addRow({name:'', all:'', target:i, time:40});
+    else for(let i=0; i<3; i++) addRow({name:'', all:'', memo:'', target:i+1, time:40});
 </script>
 </body>
 </html>
