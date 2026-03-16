@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>集結管制塔・カスタム間隔版</title>
+    <title>集結管制塔・連番カスタム版</title>
     <style>
         :root { --main: #78a355; --bg: #f5f7f5; --accent: #e8f0e8; }
         body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; font-size: 13px; }
@@ -14,14 +14,15 @@
         th { font-size: 0.65rem; background: var(--accent); color: #555; padding: 8px 2px; border-bottom: 2px solid white; }
         td { padding: 4px 2px; border-bottom: 1px solid #eee; overflow: hidden; vertical-align: middle; }
         
-        .col-order { width: 20px; text-align: center; }
+        .col-order { width: 35px; } /* 番号入力 */
         .col-input { width: auto; }
-        .col-gap { width: 45px; } /* ズレ秒 */
+        .col-gap { width: 45px; } 
         .col-time { width: 50px; }
         .col-wait { width: 45px; }
         .col-ctrl { width: 80px; }
 
         input { width: 100%; padding: 8px 2px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 12px; }
+        .order-input { text-align: center; background: #fafafa; font-weight: bold; }
         .time-input, .gap-input { font-weight: bold; color: var(--main); text-align: center; }
         .gap-input { background: #f0f7ff; border-color: #bcd; }
         
@@ -47,13 +48,13 @@
 <body>
 
 <div class="container">
-    <h1>集結管制塔（ズレ秒指定なのだ）</h1>
+    <h1>集結管制塔（連番カスタムなのだ）</h1>
     <div class="timer-display counting-down" id="mainTimer">-3</div>
 
     <table id="rallyTable">
         <thead>
             <tr>
-                <th class="col-order">順</th>
+                <th class="col-order">No.</th>
                 <th class="col-input">集結主</th>
                 <th class="col-input">同盟</th>
                 <th class="col-input">備考</th>
@@ -86,32 +87,35 @@
         const data = rows.map(row => {
             const inputs = row.querySelectorAll('input');
             return {
-                name: inputs[0].value,
-                alliance: inputs[1].value,
-                memo: inputs[2].value,
-                gap: inputs[3].value,
-                time: inputs[4].value
+                order: inputs[0].value,
+                name: inputs[1].value,
+                alliance: inputs[2].value,
+                memo: inputs[3].value,
+                gap: inputs[4].value,
+                time: inputs[5].value
             };
         });
-        localStorage.setItem('rallyDataV2', JSON.stringify(data));
+        localStorage.setItem('rallyDataV3', JSON.stringify(data));
         updateCopyText();
     }
 
     function loadData() {
-        const saved = localStorage.getItem('rallyDataV2');
+        const saved = localStorage.getItem('rallyDataV3');
         if (saved) {
             const data = JSON.parse(saved);
             data.forEach(item => addRow(item));
         } else {
-            for(let i=0; i<3; i++) addRow(i===0 ? {name:'', alliance:'', memo:'', gap:0, time:40} : {name:'', alliance:'', memo:'', gap:1, time:40});
+            for(let i=0; i<3; i++) addRow({order:i+1, name:'', alliance:'', memo:'', gap: (i===0?0:1), time:40});
         }
     }
 
-    function addRow(item = {name:'', alliance:'', memo:'', gap:1, time:40}) {
+    function addRow(item = {order:'', name:'', alliance:'', memo:'', gap:1, time:40}) {
         const tbody = document.getElementById('tableBody');
         const row = document.createElement('tr');
+        // もし order が空なら現在の行数+1を入れる
+        const orderVal = item.order || (tbody.children.length + 1);
         row.innerHTML = `
-            <td class="col-order order"></td>
+            <td class="col-order"><input type="number" class="order-input" value="${orderVal}" oninput="saveData()"></td>
             <td class="col-input"><input type="text" value="${item.name}" oninput="saveData()" placeholder="名前"></td>
             <td class="col-input"><input type="text" value="${item.alliance}" oninput="saveData()" placeholder="同盟"></td>
             <td class="col-input"><input type="text" value="${item.memo}" oninput="saveData()" placeholder="備考"></td>
@@ -132,8 +136,6 @@
 
     function updateCalculations() {
         const rows = Array.from(document.querySelectorAll('#tableBody tr'));
-        
-        // 各行の「着弾目標時間」をまず計算する
         let currentTarget = 0;
         const targets = rows.map((row, index) => {
             const gap = parseInt(row.querySelector('.gap-input').value) || 0;
@@ -141,10 +143,7 @@
             return currentTarget;
         });
 
-        // 全員の発射タイミングを合わせるためのオフセット計算
         const rowTimes = rows.map(r => parseInt(r.querySelector('.time-input').value) || 0);
-        
-        // (行軍時間 + 着弾目標) の最大値を探して、それを全体の基準にする
         let maxLaunchRef = 0;
         rows.forEach((row, i) => {
             const ref = rowTimes[i] + targets[i];
@@ -152,20 +151,7 @@
         });
 
         rows.forEach((row, index) => {
-            row.querySelector('.order').innerText = index + 1;
-            const myTime = rowTimes[index];
-            const myTarget = targets[index];
-            
-            // 待機秒 = 全体基準 - (自分の行軍時間 - 自分の目標ズレ) 
-            // 簡略化：(基準) - 自分の行軍時間 + 自分の目標
-            const waitTime = maxLaunchRef - myTime + myTarget; // ここは内部ロジック
-            // 正しい待機秒： 一番遅い人が着弾するのを0とした時の相対秒
-            const finalWait = (maxLaunchRef - myTime); 
-            
-            // シンプルなロジックに変更：
-            // 待機秒 = (最大行軍時間 + 目標値) - 自分の行軍時間
-            const wait = maxLaunchRef - myTime;
-            
+            const wait = maxLaunchRef - rowTimes[index];
             row.querySelector('.target-sec').innerText = wait;
             row.dataset.wait = wait;
         });
@@ -175,11 +161,13 @@
     function updateCopyText() {
         const rows = Array.from(document.querySelectorAll('#tableBody tr'));
         let text = "着弾スケジュール\n";
-        rows.forEach((row, index) => {
+        rows.forEach((row) => {
             const inputs = row.querySelectorAll('input');
+            const order = inputs[0].value;
+            const name = inputs[1].value || '無名';
             const waitTime = row.dataset.wait;
-            text += `${index + 1}.${inputs[0].value || '無名'} (${waitTime}秒後発射)\n`;
-            text += `${inputs[1].value || '--'} / ${inputs[2].value || '--'}\n`;
+            text += `${order}.${name} (${waitTime}秒後発射)\n`;
+            text += `${inputs[2].value || '--'} / ${inputs[3].value || '--'}\n`;
         });
         document.getElementById('copyArea').innerText = text;
     }
@@ -224,7 +212,7 @@
         });
     }
 
-    function clearData() { if(confirm("リセットするのだ？")) { localStorage.removeItem('rallyDataV2'); location.reload(); } }
+    function clearData() { if(confirm("リセットするのだ？")) { localStorage.removeItem('rallyDataV3'); location.reload(); } }
 
     loadData();
 </script>
