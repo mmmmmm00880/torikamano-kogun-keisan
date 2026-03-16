@@ -3,25 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>集結管制塔・コピペ機能付き</title>
+    <title>集結管制塔・カスタム間隔版</title>
     <style>
         :root { --main: #78a355; --bg: #f5f7f5; --accent: #e8f0e8; }
         body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; font-size: 13px; }
-        .container { max-width: 850px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .container { max-width: 900px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h1 { font-size: 1.1rem; color: var(--main); text-align: center; margin-top: 5px; }
         
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; table-layout: fixed; }
-        th { font-size: 0.7rem; background: var(--accent); color: #555; padding: 8px 2px; border-bottom: 2px solid white; }
-        td { padding: 4px 2px; border-bottom: 1px solid #eee; overflow: hidden; }
+        th { font-size: 0.65rem; background: var(--accent); color: #555; padding: 8px 2px; border-bottom: 2px solid white; }
+        td { padding: 4px 2px; border-bottom: 1px solid #eee; overflow: hidden; vertical-align: middle; }
         
-        .col-order { width: 25px; text-align: center; }
+        .col-order { width: 20px; text-align: center; }
         .col-input { width: auto; }
-        .col-time { width: 55px; }
-        .col-wait { width: 50px; }
+        .col-gap { width: 45px; } /* ズレ秒 */
+        .col-time { width: 50px; }
+        .col-wait { width: 45px; }
         .col-ctrl { width: 80px; }
 
-        input { width: 100%; padding: 8px 2px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 13px; }
-        .time-input { font-weight: bold; color: var(--main); text-align: center; }
+        input { width: 100%; padding: 8px 2px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 12px; }
+        .time-input, .gap-input { font-weight: bold; color: var(--main); text-align: center; }
+        .gap-input { background: #f0f7ff; border-color: #bcd; }
         
         .btn-group { display: flex; gap: 2px; justify-content: center; }
         .btn { padding: 8px 4px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
@@ -29,10 +31,8 @@
         .btn-move { background: #eee; color: #666; font-size: 11px; flex: 1; }
         .btn-start { background: #ff7b00; color: white; font-size: 1.2rem; width: 100%; padding: 15px; margin-top: 10px; }
         
-        /* コピペエリアのスタイル */
         .copy-section { margin-top: 30px; padding: 15px; background: #fafafa; border: 1px dashed #ccc; border-radius: 10px; }
-        .copy-section h2 { font-size: 0.9rem; margin-top: 0; color: #666; }
-        #copyArea { width: 100%; height: 150px; border: 1px solid #eee; border-radius: 5px; padding: 10px; box-sizing: border-box; font-family: monospace; font-size: 12px; background: white; white-space: pre-wrap; }
+        #copyArea { width: 100%; height: 150px; border: 1px solid #eee; border-radius: 5px; padding: 10px; box-sizing: border-box; font-family: monospace; font-size: 12px; background: white; white-space: pre-wrap; overflow-y: auto; }
         .btn-copy { background: #5c6bc0; color: white; width: 100%; margin-top: 10px; padding: 10px; }
 
         .timer-display { text-align: center; font-size: 3rem; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; }
@@ -41,14 +41,13 @@
         .target-sec { background: #fff3e0; font-weight: bold; text-align: center; color: #e65100; border-radius: 5px; }
         .active-row { background: #fffde7 !important; border: 2px solid #ffeb3b; }
         .zero-moment { background: #ff5252 !important; color: white !important; }
-        .btn-clear { background: #999; color: white; font-size: 0.8rem; margin-top: 20px; width: 100%; padding: 5px; }
+        .btn-clear { background: #999; color: white; font-size: 0.8rem; margin-top: 20px; width: 100%; padding: 5px; border:none; border-radius:5px;}
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>集結管制塔（コピペ機能付き）</h1>
-    
+    <h1>集結管制塔（ズレ秒指定なのだ）</h1>
     <div class="timer-display counting-down" id="mainTimer">-3</div>
 
     <table id="rallyTable">
@@ -58,8 +57,9 @@
                 <th class="col-input">集結主</th>
                 <th class="col-input">同盟</th>
                 <th class="col-input">備考</th>
+                <th class="col-gap">差(秒)</th>
                 <th class="col-time">行軍秒</th>
-                <th class="col-wait">待機秒</th>
+                <th class="col-wait">待機</th>
                 <th class="col-ctrl">操作</th>
             </tr>
         </thead>
@@ -70,11 +70,10 @@
     <button class="btn btn-start" onclick="toggleTimer()" id="startBtn">カウント開始なのだ！</button>
 
     <div class="copy-section">
-        <h2>チャット用コピペなのだ</h2>
-        <div id="copyArea" readonly></div>
+        <h2>チャット用コピペ</h2>
+        <div id="copyArea"></div>
         <button class="btn btn-copy" onclick="copyToClipboard()">テキストをコピーするのだ</button>
     </div>
-
     <button class="btn btn-clear" onclick="clearData()">全消去リセット</button>
 </div>
 
@@ -90,24 +89,25 @@
                 name: inputs[0].value,
                 alliance: inputs[1].value,
                 memo: inputs[2].value,
-                time: inputs[3].value
+                gap: inputs[3].value,
+                time: inputs[4].value
             };
         });
-        localStorage.setItem('rallyData', JSON.stringify(data));
-        updateCopyText(); // 保存のタイミングでテキストも更新
+        localStorage.setItem('rallyDataV2', JSON.stringify(data));
+        updateCopyText();
     }
 
     function loadData() {
-        const saved = localStorage.getItem('rallyData');
+        const saved = localStorage.getItem('rallyDataV2');
         if (saved) {
             const data = JSON.parse(saved);
             data.forEach(item => addRow(item));
         } else {
-            for(let i=0; i<3; i++) addRow();
+            for(let i=0; i<3; i++) addRow(i===0 ? {name:'', alliance:'', memo:'', gap:0, time:40} : {name:'', alliance:'', memo:'', gap:1, time:40});
         }
     }
 
-    function addRow(item = {name:'', alliance:'', memo:'', time:40}) {
+    function addRow(item = {name:'', alliance:'', memo:'', gap:1, time:40}) {
         const tbody = document.getElementById('tableBody');
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -115,6 +115,7 @@
             <td class="col-input"><input type="text" value="${item.name}" oninput="saveData()" placeholder="名前"></td>
             <td class="col-input"><input type="text" value="${item.alliance}" oninput="saveData()" placeholder="同盟"></td>
             <td class="col-input"><input type="text" value="${item.memo}" oninput="saveData()" placeholder="備考"></td>
+            <td class="col-gap"><input type="number" class="gap-input" value="${item.gap}" oninput="updateCalculations(); saveData()"></td>
             <td class="col-time"><input type="number" class="time-input" value="${item.time}" oninput="updateCalculations(); saveData()"></td>
             <td class="col-wait target-sec">-</td>
             <td class="col-ctrl">
@@ -131,79 +132,80 @@
 
     function updateCalculations() {
         const rows = Array.from(document.querySelectorAll('#tableBody tr'));
-        const times = rows.map(r => parseInt(r.querySelector('.time-input').value) || 0);
-        const maxTime = times.length > 0 ? Math.max(...times) : 0;
+        
+        // 各行の「着弾目標時間」をまず計算する
+        let currentTarget = 0;
+        const targets = rows.map((row, index) => {
+            const gap = parseInt(row.querySelector('.gap-input').value) || 0;
+            if (index > 0) currentTarget += gap;
+            return currentTarget;
+        });
+
+        // 全員の発射タイミングを合わせるためのオフセット計算
+        const rowTimes = rows.map(r => parseInt(r.querySelector('.time-input').value) || 0);
+        
+        // (行軍時間 + 着弾目標) の最大値を探して、それを全体の基準にする
+        let maxLaunchRef = 0;
+        rows.forEach((row, i) => {
+            const ref = rowTimes[i] + targets[i];
+            if (ref > maxLaunchRef) maxLaunchRef = ref;
+        });
 
         rows.forEach((row, index) => {
             row.querySelector('.order').innerText = index + 1;
-            const myTime = parseInt(row.querySelector('.time-input').value) || 0;
-            const waitTime = (maxTime + index) - myTime;
-            row.querySelector('.target-sec').innerText = waitTime;
-            row.dataset.wait = waitTime;
+            const myTime = rowTimes[index];
+            const myTarget = targets[index];
+            
+            // 待機秒 = 全体基準 - (自分の行軍時間 - 自分の目標ズレ) 
+            // 簡略化：(基準) - 自分の行軍時間 + 自分の目標
+            const waitTime = maxLaunchRef - myTime + myTarget; // ここは内部ロジック
+            // 正しい待機秒： 一番遅い人が着弾するのを0とした時の相対秒
+            const finalWait = (maxLaunchRef - myTime); 
+            
+            // シンプルなロジックに変更：
+            // 待機秒 = (最大行軍時間 + 目標値) - 自分の行軍時間
+            const wait = maxLaunchRef - myTime;
+            
+            row.querySelector('.target-sec').innerText = wait;
+            row.dataset.wait = wait;
         });
         updateCopyText();
     }
 
     function updateCopyText() {
         const rows = Array.from(document.querySelectorAll('#tableBody tr'));
-        let text = "着弾順\n";
+        let text = "着弾スケジュール\n";
         rows.forEach((row, index) => {
             const inputs = row.querySelectorAll('input');
-            const name = inputs[0].value || "（未入力）";
-            const alliance = inputs[1].value || "---";
-            const memo = inputs[2].value || "---";
-            const myTime = inputs[3].value;
             const waitTime = row.dataset.wait;
-
-            text += `${index + 1}.${name}　待機:${waitTime}秒 (行軍:${myTime}秒)\n`;
-            text += `${alliance}・${memo}\n`;
+            text += `${index + 1}.${inputs[0].value || '無名'} (${waitTime}秒後発射)\n`;
+            text += `${inputs[1].value || '--'} / ${inputs[2].value || '--'}\n`;
         });
         document.getElementById('copyArea').innerText = text;
     }
 
     function copyToClipboard() {
         const text = document.getElementById('copyArea').innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            alert("コピーしたのだ！チャットに貼り付けてね。");
-        });
+        navigator.clipboard.writeText(text).then(() => alert("コピー完了！"));
     }
 
-    function removeRow(btn) {
-        btn.closest('tr').remove();
-        updateCalculations();
-        saveData();
-    }
-
-    function moveRow(btn, direction) {
-        const row = btn.closest('tr');
-        const tbody = document.getElementById('tableBody');
-        if (direction === -1 && row.previousElementSibling) {
-            tbody.insertBefore(row, row.previousElementSibling);
-        } else if (direction === 1 && row.nextElementSibling) {
-            tbody.insertBefore(row.nextElementSibling, row);
-        }
-        updateCalculations();
-        saveData();
+    function removeRow(btn) { btn.closest('tr').remove(); updateCalculations(); saveData(); }
+    function moveRow(btn, dir) {
+        const row = btn.closest('tr'), tbody = document.getElementById('tableBody');
+        if (dir === -1 && row.previousElementSibling) tbody.insertBefore(row, row.previousElementSibling);
+        else if (dir === 1 && row.nextElementSibling) tbody.insertBefore(row.nextElementSibling, row);
+        updateCalculations(); saveData();
     }
 
     function toggleTimer() {
-        const btn = document.getElementById('startBtn');
-        const display = document.getElementById('mainTimer');
+        const btn = document.getElementById('startBtn'), display = document.getElementById('mainTimer');
         if (timerId) {
-            clearInterval(timerId);
-            timerId = null;
-            count = -3;
-            display.innerText = count;
-            btn.innerText = "カウント開始なのだ！";
-            btn.style.background = "#ff7b00";
+            clearInterval(timerId); timerId = null; count = -3;
+            display.innerText = count; btn.innerText = "カウント開始なのだ！"; btn.style.background = "#ff7b00";
             updateDisplay();
         } else {
-            btn.innerText = "リセットなのだ！";
-            btn.style.background = "#666";
-            timerId = setInterval(() => {
-                count++;
-                updateDisplay();
-            }, 1000);
+            btn.innerText = "リセットなのだ！"; btn.style.background = "#666";
+            timerId = setInterval(() => { count++; updateDisplay(); }, 1000);
         }
     }
 
@@ -211,10 +213,8 @@
         const display = document.getElementById('mainTimer');
         display.innerText = count;
         display.className = count < 0 ? "timer-display counting-down" : "timer-display counting-up";
-        const rows = document.querySelectorAll('#tableBody tr');
-        rows.forEach(row => {
-            const waitValue = parseInt(row.dataset.wait);
-            if (waitValue === count) {
+        document.querySelectorAll('#tableBody tr').forEach(row => {
+            if (parseInt(row.dataset.wait) === count) {
                 row.classList.add('active-row');
                 if (count === 0) row.classList.add('zero-moment');
             } else {
@@ -224,12 +224,7 @@
         });
     }
 
-    function clearData() {
-        if(confirm("本当に入力内容をすべて消すのだ？")) {
-            localStorage.removeItem('rallyData');
-            location.reload();
-        }
-    }
+    function clearData() { if(confirm("リセットするのだ？")) { localStorage.removeItem('rallyDataV2'); location.reload(); } }
 
     loadData();
 </script>
