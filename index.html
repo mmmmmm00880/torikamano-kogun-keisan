@@ -9,7 +9,6 @@
         body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; font-size: 13px; }
         .container { max-width: 800px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         
-        /* タイトルと説明文の中央寄せ設定 */
         h1 { font-size: 1.1rem; color: var(--main); text-align: center; margin-bottom: 5px; }
         h2 { 
             font-size: 0.75rem; 
@@ -20,20 +19,34 @@
             line-height: 1.4;
             max-width: 90%;
         }
+
+        /* テーブルを横スクロール可能にする囲いなのだ */
+        .table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+        }
         
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; table-layout: fixed; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            min-width: 450px; /* スマホでも潰れない最低限の幅なのだ */
+        }
         th { font-size: 0.65rem; background: var(--accent); color: #555; padding: 8px 2px; }
         td { padding: 4px 2px; border-bottom: 1px solid #eee; text-align: center; }
         
-        /* 列の幅指定 */
-        .col-no    { width: 25px; }
-        .col-name  { width: 85px; } 
+        /* 列の幅指定（スマホでも備考が残るように調整） */
+        .col-no    { width: 30px; }
+        .col-name  { width: 90px; } 
         .col-all   { width: 45px; } 
-        .col-memo  { width: auto; }
-        .col-target { width: 40px; } 
-        .col-time  { width: 45px; } 
-        .col-wait  { width: 40px; } 
-        .col-del   { width: 35px; }
+        .col-memo  { width: 120px; } /* 備考にしっかり幅を持たせたのだ */
+        .col-target { width: 50px; } 
+        .col-time  { width: 50px; } 
+        .col-wait  { width: 50px; } 
+        .col-del   { width: 40px; }
 
         input { width: 100%; padding: 8px 2px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 12px; text-align: center; }
         .wait-display { font-weight: bold; color: #e65100; background: #fff3e0; border-radius: 5px; padding: 5px 0; display: block; }
@@ -41,62 +54,69 @@
         .btn { border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
         .btn-add { background: var(--main); color: white; width: 100%; padding: 10px; margin-bottom: 10px; font-size: 1rem; }
         .btn-start { background: #ff7b00; color: white; width: 100%; padding: 15px; font-size: 1.2rem; margin-top: 10px; }
-        .btn-del { background: #ffcdd2; color: #c62828; width: 100%; padding: 5px 0; }
+        .btn-del { background: #ffcdd2; color: #c62828; width: 100%; padding: 8px 0; }
         
         .timer-display { text-align: center; font-size: 3rem; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; }
         .counting-down { color: #d32f2f; }
         .active-row { background: #fffde7 !important; outline: 2px solid #ffeb3b; }
         
-        .copy-area { margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 10px; font-size: 11px; white-space: pre-wrap; border: 1px solid #eee; }
+        .copy-area { margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 10px; font-size: 11px; white-space: pre-wrap; border: 1px solid #eee; text-align: left; }
         .btn-copy { background: #5c6bc0; color: white; width: 100%; padding: 10px; margin-top: 5px; }
+
+        .notice { font-size: 0.65rem; color: #999; text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>集結カウント計算</h1>
-    <h2>各項目を入力すると「待機」にカウント数が出ます。<br>同着も可能です。待機に表示される秒数で終結をかけてください。<br>入力した内容はブラウザに保存されますが、キャッシュ削除やシークレットモードで開くと消えてしまいます。</h2>
+    <h2>各項目を入力すると「待機」にカウント数が出ます。<br>自分の数値になったら発射なのだ！</h2>
     
     <div class="timer-display" id="mainTimer">-3</div>
 
-    <table id="rallyTable">
-        <thead>
-            <tr>
-                <th class="col-no">No</th>
-                <th class="col-name">集結主</th>
-                <th class="col-all">同盟</th>
-                <th class="col-memo">備考</th>
-                <th class="col-target">着弾順</th>
-                <th class="col-time">行軍</th>
-                <th class="col-wait">待機</th>
-                <th class="col-del">消</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-    </table>
+    <div class="table-wrapper">
+        <table id="rallyTable">
+            <thead>
+                <tr>
+                    <th class="col-no">No</th>
+                    <th class="col-name">集結主</th>
+                    <th class="col-all">同盟</th>
+                    <th class="col-memo">備考</th>
+                    <th class="col-target">着弾</th>
+                    <th class="col-time">行軍</th>
+                    <th class="col-wait">待機</th>
+                    <th class="col-del">消</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
 
     <button class="btn btn-add" onclick="addRow()">＋ 集結主を追加</button>
     <button class="btn btn-start" onclick="toggleTimer()" id="startBtn">カウント開始！</button>
 
     <div class="copy-area" id="copyText"></div>
     <button class="btn btn-copy" onclick="copyText()">テキストをコピー</button>
+    
+    <p class="notice">※ブラウザの履歴削除でデータが消える場合があります。シークレットモード不可なのだ。</p>
 </div>
 
 <script>
     let timerId = null;
     let count = -3;
 
-    function addRow(data = {name:'', all:'', memo:'', target:1, time:40}) {
+    function addRow(data = {name:'', all:'', memo:'', target:0, time:40}) {
         const tbody = document.getElementById('tableBody');
         const row = document.createElement('tr');
-        const defaultTarget = data.target || (tbody.children.length + 1);
+        // 初期着弾秒は行数に合わせて1, 2, 3...
+        const defaultTarget = (data.target !== undefined) ? data.target : (tbody.children.length + 1);
         
         row.innerHTML = `
             <td class="col-no"></td>
             <td class="col-name"><input type="text" value="${data.name}" placeholder="名前" oninput="update()"></td>
             <td class="col-all"><input type="text" value="${data.all}" placeholder="ABC" oninput="update()"></td>
             <td class="col-memo"><input type="text" value="${data.memo}" placeholder="備考" oninput="update()"></td>
-            <td class="col-target"><input type="number" value="${defaultTarget}" min="0" oninput="update()"></td>
+            <td class="col-target"><input type="number" value="${defaultTarget}" oninput="update()"></td>
             <td class="col-time"><input type="number" value="${data.time}" min="1" oninput="update()"></td>
             <td class="col-wait"><span class="wait-display">-</span></td>
             <td class="col-del"><button class="btn btn-del" onclick="this.closest('tr').remove(); update()">×</button></td>
@@ -134,7 +154,7 @@
         });
         
         document.getElementById('copyText').innerText = copyStr;
-        localStorage.setItem('rallyFinalSimple', JSON.stringify(rowData));
+        localStorage.setItem('rallyFinalSimpleV4', JSON.stringify(rowData));
     }
 
     function toggleTimer() {
@@ -159,16 +179,11 @@
     }
 
     function copyText() {
-        const area = document.createElement('textarea');
-        area.value = document.getElementById('copyText').innerText;
-        document.body.appendChild(area);
-        area.select();
-        document.execCommand('copy');
-        document.body.removeChild(area);
-        alert("コピーしたのだ！");
+        const text = document.getElementById('copyText').innerText;
+        navigator.clipboard.writeText(text).then(() => alert("コピーしたのだ！"));
     }
 
-    const saved = localStorage.getItem('rallyFinalSimple');
+    const saved = localStorage.getItem('rallyFinalSimpleV4');
     if (saved) JSON.parse(saved).forEach(d => addRow(d));
     else for(let i=0; i<3; i++) addRow({name:'', all:'', memo:'', target:i+1, time:40});
 </script>
