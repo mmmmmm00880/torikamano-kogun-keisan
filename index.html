@@ -19,6 +19,15 @@
             line-height: 1.4;
             max-width: 90%;
         }
+        h3 { 
+            font-size: 0.5rem; 
+            color: #888; 
+            font-weight: normal; 
+            text-align: center; 
+            margin: 0 auto 15px; 
+            line-height: 1.4;
+            max-width: 90%;
+        }
 
         /* テーブルを横スクロール可能にする囲い */
         .table-wrapper {
@@ -71,7 +80,11 @@
 <div class="container">
     <h1>集結カウント計算</h1>
     <h2>各項目を入力すると「待機」にカウント数が出ます。<br>自分の数値になったら集結を出してください！<br>同着指定も可能です。</h2>
-    
+    <h3>まず、全員の中で「出発から着弾までにかかる合計時間」が最も長い人を特定。<br>
+        基準値 = max(行軍時間+ 着弾秒)　<br>
+        基準値から、「行軍時間」と「目標の着弾秒」を差し引き。<br>
+        待機時間 = 基準値 - (行軍時間+ 目標の着弾秒)  
+    </h3>
     <div class="timer-display" id="mainTimer">-3</div>
 
     <div class="table-wrapper">
