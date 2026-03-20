@@ -5,6 +5,46 @@
     <link rel="stylesheet" href="insert.css">
 </head>
 <body>
+    <div class="map-selector">
+    <p style="font-size: 11px; color: #666; margin-bottom: 8px; text-align: center;">
+        【自分の位置を選択して自動入力】
+    </p>
+    <div id="castleMap" class="castle-grid">
+        </div>
+</div>
+
+<style>
+/* マップ全体のスタイル */
+.map-selector {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #fdfdfd;
+    border: 1px solid #eee;
+    border-radius: 10px;
+}
+.castle-grid {
+    display: grid;
+    grid-template-columns: repeat(14, 1fr); /* 14x14 */
+    gap: 1px;
+    background: #ccc; /* 枠線の色 */
+    border: 1px solid #ccc;
+}
+.cell {
+    aspect-ratio: 1 / 1;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+.cell:hover { background: #e8f5e9; }
+/* 特殊マスの色付け */
+.sun-castle { background: #ffd54f !important; font-weight: bold; font-size: 7px; cursor: default; }
+.fortress { background: #9e9e9e !important; color: white; cursor: default; }
+.gray-zone { background: #bdbdbd !important; cursor: default; }
+</style>
     <div class="insert-container">
         <div class="formula-box">
             <b>【差し込み（カット）計算】</b><br>
