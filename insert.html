@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="insert.css">
+</head>
+<body>
+    <div class="insert-container">
+        <div class="formula-box">
+            <b>【差し込み計算】</b><br>
+            集結Aが着弾した直後（+X秒）に自分の援軍が着くための「出し時」を計算します。
+        </div>
+
+        <div class="input-group">
+            <label>ターゲットの集結残り秒数 (秒)</label>
+            <input type="number" id="targetRally" value="60" oninput="calcInsert()">
+        </div>
+
+        <div class="input-group">
+            <label>相手（集結主）の行軍時間 (秒)</label>
+            <input type="number" id="enemyTime" value="40" oninput="calcInsert()">
+        </div>
+
+        <div class="input-group">
+            <label>自分の行軍時間 (秒)</label>
+            <input type="number" id="myTime" value="35" oninput="calcInsert()">
+        </div>
+
+        <div class="input-group">
+            <label>着弾の何秒後に差し込む？ (秒)</label>
+            <input type="number" id="offset" value="1" oninput="calcInsert()">
+        </div>
+
+        <div class="result-box">
+            <p>あなたの出すタイミング：</p>
+            <div id="insertResult" class="result-wait">計算中...</div>
+            <p class="sub-text">※集結の残り秒数がこの数値になったら発射！</p>
+        </div>
+    </div>
+    <script src="insert.js"></script>
+</body>
+</html>
