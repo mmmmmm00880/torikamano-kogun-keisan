@@ -24,7 +24,7 @@ function calc() {
         resultDiv.style.color = "#bf360c"; // オレンジ
     } else {
         // 【プラスの場合】相手が走り出す「前」の出発時間（ABS）で出す
-        labelP.innerText = "集結の「出発時間」が";
+        labelP.innerText = "集結の「行軍時間」が";
         resultDiv.innerText = timeStr;
         resultDiv.style.color = "#d32f2f"; // 赤
     }
