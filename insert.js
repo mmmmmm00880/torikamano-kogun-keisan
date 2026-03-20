@@ -4,25 +4,33 @@ function calc() {
     const myTotal = (parseInt(document.getElementById('myMin').value) || 0) * 60 + (parseInt(document.getElementById('mySec').value) || 0);
     const offset = parseInt(document.getElementById('offset').value) || 0;
 
-    // 発射タイミング（集結残り秒数）の計算
-    // 式： 自分の行軍時間 - 相手の行軍時間 + 差し込みたい秒数
+    // 計算式： 自分の行軍時間 - 相手の行軍時間 + 差し込みたい秒数
     let launchAtTotal = myTotal - enemyTotal + offset;
 
     const resultDiv = document.getElementById('insertResult');
+    const labelP = resultDiv.previousElementSibling; // 「画面の集結カウントが」の部分
 
     if (launchAtTotal <= 0) {
-        resultDiv.innerText = "即出し！";
-        resultDiv.style.fontSize = "1.8rem";
+        // 【プラス（または0）の場合】相手が走り出した「後」に自分が出る
+        // 表示例：集結残り 05秒 になったら発射
+        const absValue = Math.abs(launchAtTotal);
+        const m = Math.floor(absValue / 60);
+        const s = absValue % 60;
+        const displayS = s < 10 ? "0" + s : s;
+
+        labelP.innerText = "集結の「残り時間」が";
+        resultDiv.innerText = m + "分 " + displayS + "秒";
+        resultDiv.style.color = "#bf360c"; // 通常のオレンジ系
     } else {
-        // 秒を「分：秒」の形式に戻す
+        // 【マイナスの場合】相手が走り出す「前」に自分が出る
+        // 表示例：集結の「出発時間」が 1分10秒 になったら発射
         const m = Math.floor(launchAtTotal / 60);
         const s = launchAtTotal % 60;
-        
-        // 1桁の秒数を「05」のように表示
         const displayS = s < 10 ? "0" + s : s;
-        
+
+        labelP.innerText = "集結の「出発時間」が";
         resultDiv.innerText = m + "分 " + displayS + "秒";
-        resultDiv.style.fontSize = "2.2rem";
+        resultDiv.style.color = "#d32f2f"; // 注意を促す赤系
     }
 }
 
