@@ -10,28 +10,27 @@ function calc() {
     const resultDiv = document.getElementById('insertResult');
     const labelP = resultDiv.previousElementSibling; // 「画面の集結カウントが」の部分
 
+    // 絶対値（ABS）を取得
+    const absValue = Math.abs(launchAtTotal);
+    const m = Math.floor(absValue / 60);
+    const s = absValue % 60;
+    const displayS = s < 10 ? "0" + s : s;
+    const timeStr = m + "分 " + displayS + "秒";
+
     if (launchAtTotal <= 0) {
-        // 【プラス（または0）の場合】相手が走り出した「後」に自分が出る
-        // 表示例：集結残り 05秒 になったら発射
-        const absValue = Math.abs(launchAtTotal);
-        const m = Math.floor(absValue / 60);
-        const s = absValue % 60;
-        const displayS = s < 10 ? "0" + s : s;
-
+        // 【0以下の場合】相手が走り出した「後」の残り秒数で出す
         labelP.innerText = "集結の「残り時間」が";
-        resultDiv.innerText = m + "分 " + displayS + "秒";
-        resultDiv.style.color = "#bf360c"; // 通常のオレンジ系
+        resultDiv.innerText = timeStr;
+        resultDiv.style.color = "#bf360c"; // オレンジ
     } else {
-        // 【マイナスの場合】相手が走り出す「前」に自分が出る
-        // 表示例：集結の「出発時間」が 1分10秒 になったら発射
-        const m = Math.floor(launchAtTotal / 60);
-        const s = launchAtTotal % 60;
-        const displayS = s < 10 ? "0" + s : s;
-
+        // 【プラスの場合】相手が走り出す「前」の出発時間（ABS）で出す
         labelP.innerText = "集結の「出発時間」が";
-        resultDiv.innerText = m + "分 " + displayS + "秒";
-        resultDiv.style.color = "#d32f2f"; // 注意を促す赤系
+        resultDiv.innerText = timeStr;
+        resultDiv.style.color = "#d32f2f"; // 赤
     }
+    
+    // 文字サイズを調整（分秒が入るので少し小さめに）
+    resultDiv.style.fontSize = "2.2rem";
 }
 
 // ページを開いた時に一度計算する
