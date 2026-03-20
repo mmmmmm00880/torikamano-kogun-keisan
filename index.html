@@ -1,8 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>集結カウント計算</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
 <div class="container">
     <h1>集結カウント計算</h1>
     
-    <h2>各項目を入力すると「待機」にカウント数が出ます。<br>自分の数値になったら集結を出してください！</h2>
-    
+    <div class="formula-box">
+        <b>【計算公式】</b><br>
+        1. 基準値 = 全員の中で最大の(行軍 + 着弾秒)<br>
+        2. 待機秒 = 基準値 - (自分の行軍 + 目標の着弾秒)
+    </div>
+
     <div class="timer-display" id="mainTimer">-3</div>
 
     <div class="table-wrapper">
@@ -29,9 +43,9 @@
     <div class="copy-area" id="copyText"></div>
     <button class="btn btn-copy" onclick="copyText()">テキストをコピー</button>
     
-    <div class="formula-box">
-        <p><strong>計算公式:</strong> 待機時間 = 最大(行軍+着弾) - (自分の行軍+自分の着弾)</p>
-    </div>
-
-    <p class="notice">※ブラウザの履歴削除やキャッシュのクリアでデータが消える場合があります。</p>
+    <p class="notice">※データはブラウザに自動保存されます。</p>
 </div>
+
+<script src="script.js"></script>
+</body>
+</html>
