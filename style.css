@@ -1,104 +1,41 @@
-:root { --main: #78a355; --bg: #f5f7f5; --accent: #e8f0e8; }
-body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 10px; font-size: 13px; }
-.container { max-width: 800px; margin: auto; background: white; padding: 15px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+:root { --main: #78a355; --accent: #e8f0e8; }
+body { font-family: sans-serif; margin: 0; padding: 10px; background: #fff; }
 
-h1 { font-size: 1.1rem; color: var(--main); text-align: center; margin-bottom: 5px; }
+.insert-container { max-width: 100%; }
 
-/* h2: 文字を小さく、薄いグレーに */
-h2 { 
-    font-size: 0.65rem; 
-    color: #aaa; 
-    font-weight: normal; 
-    text-align: center; 
-    margin: 0 auto 10px; 
-    line-height: 1.4;
-    max-width: 90%;
-}
-
-/* h3: 公式を囲って、きれいに整列 */
-/* style.css の h3 部分を以下に書き換え・追記 */
-h3 { 
-    font-size: 0.65rem; 
-    color: #666; 
-    font-weight: normal; 
-    text-align: left; 
-    margin: 10px auto 20px; 
-    line-height: 1.6;
-    max-width: 90%;
-    background: #fcfdfc;
-    border: 1px solid var(--accent);
-    padding: 12px;
+.formula-box {
+    background: var(--accent);
+    padding: 10px;
     border-radius: 8px;
+    font-size: 11px;
+    margin-bottom: 20px;
+    color: #555;
 }
 
-/* タイトル部分：少し太く、色を変える */
-.formula-title {
-    color: var(--main);
-    font-weight: bold;
-    font-size: 0.7rem;
+.input-group { margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; }
+.input-group label { display: block; font-size: 0.8rem; font-weight: bold; color: #333; margin-bottom: 8px; }
+
+.time-inputs { display: flex; align-items: center; gap: 8px; }
+.time-inputs input { 
+    width: 70px; 
+    padding: 10px; 
+    border: 1px solid #ddd; 
+    border-radius: 6px; 
+    font-size: 16px; 
+    text-align: center;
 }
+.time-inputs span { font-size: 0.8rem; color: #666; }
 
-/* 公式メイン：太字で目立たせる */
-.formula-main {
-    display: inline-block;
-    margin: 5px 0;
-    font-weight: bold;
-    color: #333;
-    background: #fff;
-    padding: 2px 8px;
-    border-radius: 4px;
-    border: 1px dashed #ddd;
+.result-box {
+    background: #fff3e0;
+    border: 2px solid #ffb74d;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin-top: 20px;
 }
+.result-box p { margin: 0; font-size: 0.9rem; color: #e65100; }
+.result-wait { font-size: 2.2rem; font-weight: bold; color: #bf360c; margin: 5px 0; }
+.emphasis { font-weight: bold; color: #d32f2f !important; font-size: 1rem !important; }
 
-/* 解説部分：さらに小さく、グレーに */
-.formula-details {
-    display: block;
-    font-size: 0.6rem;
-    color: #999;
-    margin-top: 5px;
-}
-
-/* テーブルを横スクロール可能にする囲い */
-.table-wrapper {
-    width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin-bottom: 15px;
-    border: 1px solid #eee;
-    border-radius: 8px;
-}
-
-table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    min-width: 450px; 
-}
-th { font-size: 0.65rem; background: var(--accent); color: #555; padding: 8px 2px; }
-td { padding: 4px 2px; border-bottom: 1px solid #eee; text-align: center; }
-
-/* 列の幅指定 */
-.col-no    { width: 30px; }
-.col-name  { width: 90px; } 
-.col-all   { width: 45px; } 
-.col-memo  { width: 120px; } 
-.col-target { width: 50px; } 
-.col-time  { width: 50px; } 
-.col-wait  { width: 50px; } 
-.col-del   { width: 40px; }
-
-input { width: 100%; padding: 8px 2px; border: 1px solid #ddd; border-radius: 5px; box-sizing: border-box; font-size: 12px; text-align: center; }
-.wait-display { font-weight: bold; color: #e65100; background: #fff3e0; border-radius: 5px; padding: 5px 0; display: block; }
-
-.btn { border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-.btn-add { background: var(--main); color: white; width: 100%; padding: 10px; margin-bottom: 10px; font-size: 1rem; }
-.btn-start { background: #ff7b00; color: white; width: 100%; padding: 15px; font-size: 1.2rem; margin-top: 10px; }
-.btn-del { background: #ffcdd2; color: #c62828; width: 100%; padding: 8px 0; }
-
-.timer-display { text-align: center; font-size: 3rem; font-weight: bold; margin: 10px 0; font-variant-numeric: tabular-nums; }
-.counting-down { color: #d32f2f; }
-.active-row { background: #fffde7 !important; outline: 2px solid #ffeb3b; }
-
-.copy-area { margin-top: 20px; padding: 10px; background: #f9f9f9; border-radius: 10px; font-size: 11px; white-space: pre-wrap; border: 1px solid #eee; text-align: left; }
-.btn-copy { background: #5c6bc0; color: white; width: 100%; padding: 10px; margin-top: 5px; }
-
-.notice { font-size: 0.65rem; color: #999; text-align: center; margin-top: 10px; }
+.guide { margin-top: 15px; font-size: 10px; color: #bbb; text-align: center; }
