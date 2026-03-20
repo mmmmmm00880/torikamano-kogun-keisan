@@ -1,10 +1,10 @@
 let timerId = null;
 let count = -3;
 
-// 行を追加する関数
 function addRow(data = {name:'', all:'', memo:'', target:0, time:40}) {
     const tbody = document.getElementById('tableBody');
     const row = document.createElement('tr');
+    // 初期着弾秒は行数に合わせて1, 2, 3...
     const defaultTarget = (data.target !== undefined) ? data.target : (tbody.children.length + 1);
     
     row.innerHTML = `
@@ -21,7 +21,6 @@ function addRow(data = {name:'', all:'', memo:'', target:0, time:40}) {
     update();
 }
 
-// 数値を計算して保存する関数
 function update() {
     const rows = Array.from(document.querySelectorAll('#tableBody tr'));
     const rowData = rows.map(row => {
@@ -43,18 +42,24 @@ function update() {
     let copyStr = "着弾スケジュール\n";
     rows.forEach((row, i) => {
         row.querySelector('.col-no').innerText = i + 1;
-        const d = rowData[i];
-        const wait = maxLaunchRef - (d.time + d.target);
+        const d = row.querySelectorAll('input');
+        const d_vals = {
+            name: d[0].value,
+            all: d[1].value,
+            memo: d[2].value,
+            target: parseInt(d[3].value) || 0,
+            time: parseInt(d[4].value) || 0
+        };
+        const wait = maxLaunchRef - (d_vals.time + d_vals.target);
         row.querySelector('.wait-display').innerText = wait;
         row.dataset.wait = wait;
-        copyStr += `${i+1}.${d.name||'--'}(${d.all||'--'}) ${d.memo? d.memo+' ':''}待機:${wait}秒\n`;
+        copyStr += `${i+1}.${d_vals.name||'--'}(${d_vals.all||'--'}) ${d_vals.memo? d_vals.memo+' ':''}待機:${wait}秒\n`;
     });
     
     document.getElementById('copyText').innerText = copyStr;
     localStorage.setItem('rallyFinalSimpleV4', JSON.stringify(rowData));
 }
 
-// タイマーの開始/停止
 function toggleTimer() {
     const btn = document.getElementById('startBtn');
     const display = document.getElementById('mainTimer');
@@ -76,18 +81,11 @@ function toggleTimer() {
     }
 }
 
-// テキストコピー
 function copyText() {
     const text = document.getElementById('copyText').innerText;
-    navigator.clipboard.writeText(text).then(() => alert("コピーしました！"));
+    navigator.clipboard.writeText(text).then(() => alert("コピーしたのだ！"));
 }
 
-// ページ読み込み時の処理
-window.onload = () => {
-    const saved = localStorage.getItem('rallyFinalSimpleV4');
-    if (saved) {
-        JSON.parse(saved).forEach(d => addRow(d));
-    } else {
-        for(let i=0; i<3; i++) addRow({name:'', all:'', memo:'', target:i+1, time:40});
-    }
-};
+const saved = localStorage.getItem('rallyFinalSimpleV4');
+if (saved) JSON.parse(saved).forEach(d => addRow(d));
+else for(let i=0; i<3; i++) addRow({name:'', all:'', memo:'', target:i+1, time:40});
