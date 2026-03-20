@@ -1,0 +1,28 @@
+:root { --main: #78a355; --accent: #e8f0e8; }
+body { font-family: sans-serif; background: white; margin: 0; padding: 10px; font-size: 13px; }
+
+.insert-container { max-width: 100%; }
+
+.formula-box {
+    background: var(--accent);
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    margin-bottom: 20px;
+}
+
+.input-group { margin-bottom: 15px; }
+.input-group label { display: block; font-size: 0.75rem; color: #666; margin-bottom: 5px; }
+input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+
+.result-box {
+    background: #fff3e0;
+    border: 2px solid #ffb74d;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin-top: 20px;
+}
+.result-box p { margin: 0; font-size: 0.8rem; color: #e65100; }
+.result-wait { font-size: 2.5rem; font-weight: bold; color: #bf360c; margin: 10px 0; }
+.sub-text { font-size: 0.7rem !important; color: #999 !important; }
