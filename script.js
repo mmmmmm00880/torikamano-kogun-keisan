@@ -1,14 +1,6 @@
 let timerId = null;
 let count = -3;
 
-// タブ切り替え
-function showTab(tabId) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById(tabId).classList.add('active');
-    event.currentTarget.classList.add('active');
-}
-
 // 行の追加
 function addRow(data = {name:'', all:'', memo:'', target:0, time:40}) {
     const tbody = document.getElementById('tableBody');
