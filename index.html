@@ -1,68 +1,37 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>集結カウント計算</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
 <div class="container">
     <h1>集結カウント計算</h1>
     
-    <div class="tabs">
-        <button class="tab-btn active" onclick="showTab('tab-main')">メイン計算</button>
-        <button class="tab-btn" onclick="showTab('tab-formula')">計算公式</button>
+    <h2>各項目を入力すると「待機」にカウント数が出ます。<br>自分の数値になったら集結を出してください！</h2>
+    
+    <div class="timer-display" id="mainTimer">-3</div>
+
+    <div class="table-wrapper">
+        <table id="rallyTable">
+            <thead>
+                <tr>
+                    <th class="col-no">No</th>
+                    <th class="col-name">集結主</th>
+                    <th class="col-all">同盟</th>
+                    <th class="col-memo">備考</th>
+                    <th class="col-target">着弾</th>
+                    <th class="col-time">行軍</th>
+                    <th class="col-wait">待機</th>
+                    <th class="col-del">消</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
     </div>
 
-    <div id="tab-main" class="tab-content active">
-        <h2>各項目を入力すると「待機」にカウント数が出ます。<br>自分の数値になったら集結を出してください！</h2>
-        
-        <div class="timer-display" id="mainTimer">-3</div>
+    <button class="btn btn-add" onclick="addRow()">＋ 集結主を追加</button>
+    <button class="btn btn-start" onclick="toggleTimer()" id="startBtn">カウント開始！</button>
 
-        <div class="table-wrapper">
-            <table id="rallyTable">
-                <thead>
-                    <tr>
-                        <th class="col-no">No</th>
-                        <th class="col-name">集結主</th>
-                        <th class="col-all">同盟</th>
-                        <th class="col-memo">備考</th>
-                        <th class="col-target">着弾</th>
-                        <th class="col-time">行軍</th>
-                        <th class="col-wait">待機</th>
-                        <th class="col-del">消</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-
-        <button class="btn btn-add" onclick="addRow()">＋ 集結主を追加</button>
-        <button class="btn btn-start" onclick="toggleTimer()" id="startBtn">カウント開始！</button>
-
-        <div class="copy-area" id="copyText"></div>
-        <button class="btn btn-copy" onclick="copyText()">テキストをコピー</button>
+    <div class="copy-area" id="copyText"></div>
+    <button class="btn btn-copy" onclick="copyText()">テキストをコピー</button>
+    
+    <div class="formula-box">
+        <p><strong>計算公式:</strong> 待機時間 = 最大(行軍+着弾) - (自分の行軍+自分の着弾)</p>
     </div>
 
-    <div id="tab-formula" class="tab-content">
-        <h2>計算の仕組み（公式）</h2>
-        <div class="formula-box">
-            <p><strong>1. 基準値を決める</strong><br>
-            全員の中で「出発から着弾までの合計」が一番長い人を基準にします。<br>
-            <span>基準値 = max(行軍時間 + 着弾秒)</span></p>
-            
-            <p><strong>2. 待機時間を出す</strong><br>
-            基準値から自分の時間を引いたものが「待機秒」です。<br>
-            <span>待機時間 = 基準値 - (行軍時間 + 目標の着弾秒)</span></p>
-        </div>
-        <p class="notice">※タブを切り替えても入力データは保持されます。</p>
-    </div>
-
-    <p class="notice">※ブラウザの履歴削除やキャッシュのクリアでデータが消える場合があります。シークレットモード不可。</p>
+    <p class="notice">※ブラウザの履歴削除やキャッシュのクリアでデータが消える場合があります。</p>
 </div>
-
-<script src="script.js"></script>
-</body>
-</html>
