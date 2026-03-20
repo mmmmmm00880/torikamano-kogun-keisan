@@ -1,7 +1,7 @@
 let timerId = null;
 let count = -3;
 
-// 行の追加
+// 行を追加する関数
 function addRow(data = {name:'', all:'', memo:'', target:0, time:40}) {
     const tbody = document.getElementById('tableBody');
     const row = document.createElement('tr');
@@ -21,7 +21,7 @@ function addRow(data = {name:'', all:'', memo:'', target:0, time:40}) {
     update();
 }
 
-// 計算とデータ保存
+// 数値を計算して保存する関数
 function update() {
     const rows = Array.from(document.querySelectorAll('#tableBody tr'));
     const rowData = rows.map(row => {
@@ -54,21 +54,17 @@ function update() {
     localStorage.setItem('rallyFinalSimpleV4', JSON.stringify(rowData));
 }
 
-// タイマー開始/リセット
+// タイマーの開始/停止
 function toggleTimer() {
     const btn = document.getElementById('startBtn');
     const display = document.getElementById('mainTimer');
     if (timerId) {
-        clearInterval(timerId); 
-        timerId = null; 
-        count = -3;
-        btn.innerText = "カウント開始！"; 
-        btn.style.background = "#ff7b00";
+        clearInterval(timerId); timerId = null; count = -3;
+        btn.innerText = "カウント開始！"; btn.style.background = "#ff7b00";
         display.innerText = count;
         display.className = "timer-display";
     } else {
-        btn.innerText = "リセット"; 
-        btn.style.background = "#666";
+        btn.innerText = "リセット"; btn.style.background = "#666";
         timerId = setInterval(() => {
             count++;
             display.innerText = count;
@@ -86,7 +82,7 @@ function copyText() {
     navigator.clipboard.writeText(text).then(() => alert("コピーしました！"));
 }
 
-// 初期化（保存データの読み込み）
+// ページ読み込み時の処理
 window.onload = () => {
     const saved = localStorage.getItem('rallyFinalSimpleV4');
     if (saved) {
