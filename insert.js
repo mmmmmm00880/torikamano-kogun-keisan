@@ -35,3 +35,46 @@ function calc() {
 
 // ページを開いた時に一度計算する
 window.onload = calc;
+
+// マップのデータ（0は空き、数字は秒数、'S'は太陽城、'F'は要塞、'G'はグレーゾーン）
+const mapData = [
+    [0,0,0,0,0,66,0,0,0,0,66,0,0,0],
+    [0,0,0,0,0,58,55,52,52,55,58,0,0,0],
+    [0,0,0,0,0,50,47,45,45,47,50,0,0,0],
+    [0,0,0,0,48,43,39,36,36,39,43,48,0,0],
+    [66,58,50,43,'F','G','G','G','G','F',43,50,58,66],
+    [0,55,47,39,'G','G','G','G','G','G',39,47,55,0],
+    [0,52,45,36,'G','G','S','S','G','G',36,45,52,0],
+    [0,52,45,36,'G','G','S','S','G','G',36,45,52,0],
+    [0,50,47,39,'G','G','G','G','G','G',39,47,55,0],
+    [66,58,50,43,'F','G','G','G','G','F',43,50,58,66],
+    [0,0,0,48,43,39,36,36,39,43,48,0,0,0],
+    [0,0,0,0,50,47,45,45,47,50,0,0,0,0],
+    [0,0,0,0,58,55,52,52,55,58,0,0,0,0],
+    [0,0,0,0,0,66,0,0,0,0,66,0,0,0]
+];
+
+window.addEventListener('DOMContentLoaded', () => {
+    const grid = document.getElementById('castleMap');
+    if(!grid) return;
+
+    mapData.forEach(row => {
+        row.forEach(val => {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            
+            if (val === 'S') { cell.classList.add('sun-castle'); cell.innerText = '太陽'; }
+            else if (val === 'F') { cell.classList.add('fortress'); cell.innerText = '砦'; }
+            else if (val === 'G') { cell.classList.add('gray-zone'); }
+            else if (typeof val === 'number' && val > 0) {
+                cell.innerText = val;
+                cell.onclick = () => {
+                    document.getElementById('myMin').value = 0;
+                    document.getElementById('mySec').value = val;
+                    calc(); // 再計算
+                };
+            }
+            grid.appendChild(cell);
+        });
+    });
+});
