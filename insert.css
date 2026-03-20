@@ -1,5 +1,5 @@
 :root { --main: #78a355; --accent: #e8f0e8; }
-body { font-family: sans-serif; background: white; margin: 0; padding: 10px; font-size: 13px; }
+body { font-family: sans-serif; margin: 0; padding: 10px; background: #fff; }
 
 .insert-container { max-width: 100%; }
 
@@ -9,11 +9,22 @@ body { font-family: sans-serif; background: white; margin: 0; padding: 10px; fon
     border-radius: 8px;
     font-size: 11px;
     margin-bottom: 20px;
+    color: #555;
 }
 
-.input-group { margin-bottom: 15px; }
-.input-group label { display: block; font-size: 0.75rem; color: #666; margin-bottom: 5px; }
-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+.input-group { margin-bottom: 15px; border-bottom: 1px solid #f0f0f0; padding-bottom: 10px; }
+.input-group label { display: block; font-size: 0.8rem; font-weight: bold; color: #333; margin-bottom: 8px; }
+
+.time-inputs { display: flex; align-items: center; gap: 8px; }
+.time-inputs input { 
+    width: 70px; 
+    padding: 10px; 
+    border: 1px solid #ddd; 
+    border-radius: 6px; 
+    font-size: 16px; 
+    text-align: center;
+}
+.time-inputs span { font-size: 0.8rem; color: #666; }
 
 .result-box {
     background: #fff3e0;
@@ -23,6 +34,8 @@ input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; 
     text-align: center;
     margin-top: 20px;
 }
-.result-box p { margin: 0; font-size: 0.8rem; color: #e65100; }
-.result-wait { font-size: 2.5rem; font-weight: bold; color: #bf360c; margin: 10px 0; }
-.sub-text { font-size: 0.7rem !important; color: #999 !important; }
+.result-box p { margin: 0; font-size: 0.9rem; color: #e65100; }
+.result-wait { font-size: 2.2rem; font-weight: bold; color: #bf360c; margin: 5px 0; }
+.emphasis { font-weight: bold; color: #d32f2f !important; font-size: 1rem !important; }
+
+.guide { margin-top: 15px; font-size: 10px; color: #bbb; text-align: center; }
