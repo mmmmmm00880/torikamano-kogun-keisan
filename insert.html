@@ -7,34 +7,43 @@
 <body>
     <div class="insert-container">
         <div class="formula-box">
-            <b>【差し込み計算】</b><br>
-            集結Aが着弾した直後（+X秒）に自分の援軍が着くための「出し時」を計算します。
+            <b>【差し込み（カット）計算】</b><br>
+            集結Aの着弾直後に、自分の援軍を重ねるタイミングを計算します。
         </div>
 
-        <div class="input-group">
-            <label>ターゲットの集結残り秒数 (秒)</label>
-            <input type="number" id="targetRally" value="60" oninput="calcInsert()">
-        </div>
+        <div class="input-section">
+            <div class="input-group">
+                <label>相手（集結主）の行軍時間</label>
+                <div class="time-inputs">
+                    <input type="number" id="enemyMin" value="0" oninput="calc()"> <span>分</span>
+                    <input type="number" id="enemySec" value="40" oninput="calc()"> <span>秒</span>
+                </div>
+            </div>
 
-        <div class="input-group">
-            <label>相手（集結主）の行軍時間 (秒)</label>
-            <input type="number" id="enemyTime" value="40" oninput="calcInsert()">
-        </div>
+            <div class="input-group">
+                <label>自分の行軍時間</label>
+                <div class="time-inputs">
+                    <input type="number" id="myMin" value="0" oninput="calc()"> <span>分</span>
+                    <input type="number" id="mySec" value="35" oninput="calc()"> <span>秒</span>
+                </div>
+            </div>
 
-        <div class="input-group">
-            <label>自分の行軍時間 (秒)</label>
-            <input type="number" id="myTime" value="35" oninput="calcInsert()">
-        </div>
-
-        <div class="input-group">
-            <label>着弾の何秒後に差し込む？ (秒)</label>
-            <input type="number" id="offset" value="1" oninput="calcInsert()">
+            <div class="input-group">
+                <label>着弾の何秒後に差し込む？</label>
+                <div class="time-inputs">
+                    <input type="number" id="offset" value="1" oninput="calc()"> <span>秒後</span>
+                </div>
+            </div>
         </div>
 
         <div class="result-box">
-            <p>あなたの出すタイミング：</p>
-            <div id="insertResult" class="result-wait">計算中...</div>
-            <p class="sub-text">※集結の残り秒数がこの数値になったら発射！</p>
+            <p>画面の集結カウントが</p>
+            <div id="insertResult" class="result-wait">--分 --秒</div>
+            <p class="emphasis">になったら発射！</p>
+        </div>
+
+        <div class="guide">
+            <p>※計算式：自分の行軍 - 相手の行軍 + 差し込み秒</p>
         </div>
     </div>
     <script src="insert.js"></script>
