@@ -1,11 +1,124 @@
-<div class="tab-menu" style="display: flex; gap: 5px; margin-bottom: 15px;">
-    <button id="btn-main" class="tab-btn active" onclick="switchTab('main')">集結カウント</button>
-    <button id="btn-insert" class="tab-btn" onclick="switchTab('insert')">差し込み計算</button>
-</div>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>集結・差し込み計算ツール</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* タブ専用の追加スタイル */
+        .tab-menu {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--accent);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: #eee;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            color: #888;
+            font-weight: bold;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        .tab-btn.active {
+            background: var(--main);
+            color: white;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        iframe {
+            width: 100%;
+            height: 700px; /* 差し込み計算画面の高さ */
+            border: none;
+        }
+    </style>
+</head>
+<body>
 
-<div id="content-main">
+<div class="container">
+    <h1>集結ツールセット</h1>
+
+    <div class="tab-menu">
+        <button id="btn-main" class="tab-btn active" onclick="switchTab('main')">集結カウント計算</button>
+        <button id="btn-insert" class="tab-btn" onclick="switchTab('insert')">差し込み計算</button>
     </div>
 
-<div id="content-insert" style="display: none;">
-    <iframe src="insert.html" style="width: 100%; border: none; min-height: 600px;"></iframe>
+    <div id="content-main" class="tab-content active">
+        <h2>各項目を入力すると「待機」にカウント数が出ます。<br>自分の数値になったら集結を出してください！</h2>
+        <h3>
+            <span class="formula-title">【計算公式】</span><br>
+            <span class="formula-main">待機時間 = 基準値 - (行軍時間 + 目標の着弾秒)</span><br>
+            <span class="formula-details">
+                ※基準値：全員の中で「行軍時間 + 着弾秒」が最も長い人の数値
+            </span>
+        </h3>
+
+        <div class="timer-display" id="mainTimer">-3</div>
+
+        <div class="table-wrapper">
+            <table id="rallyTable">
+                <thead>
+                    <tr>
+                        <th class="col-no">No</th>
+                        <th class="col-name">集結主</th>
+                        <th class="col-all">同盟</th>
+                        <th class="col-memo">備考</th>
+                        <th class="col-target">着弾</th>
+                        <th class="col-time">行軍</th>
+                        <th class="col-wait">待機</th>
+                        <th class="col-del">消</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+
+        <button class="btn btn-add" onclick="addRow()">＋ 集結主を追加</button>
+        <button class="btn btn-start" onclick="toggleTimer()" id="startBtn">カウント開始！</button>
+
+        <div class="copy-area" id="copyText"></div>
+        <button class="btn btn-copy" onclick="copyText()">テキストをコピー</button>
+        
+        <p class="notice">※ブラウザの履歴削除やキャッシュのクリアでデータが消える場合があります。</p>
+    </div>
+
+    <div id="content-insert" class="tab-content">
+        <iframe src="insert.html"></iframe>
+    </div>
 </div>
+
+<script src="script.js"></script>
+
+<script>
+    // タブ切り替え用のスクリプト
+    function switchTab(tabName) {
+        // 全コンテンツを非表示にする
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        // 全ボタンのactiveクラスを外す
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+
+        // 選択されたタブとボタンを有効にする
+        if (tabName === 'main') {
+            document.getElementById('content-main').classList.add('active');
+            document.getElementById('btn-main').classList.add('active');
+        } else {
+            document.getElementById('content-insert').classList.add('active');
+            document.getElementById('btn-insert').classList.add('active');
+        }
+    }
+</script>
+</body>
+</html>
