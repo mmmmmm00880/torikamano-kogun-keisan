@@ -77,8 +77,8 @@ function generateMap() {
             else if (typeof val === 'number' && val > 0) {
                 cell.innerText = val;
                 cell.onclick = () => {
-                    document.getElementById('myMin').value = 0;
-                    document.getElementById('mySec').value = val;
+                    document.getElementById('enemyMin').value = 0;
+                    document.getElementById('enemySec').value = val;
                     calc(); // 再計算
                 };
             }
