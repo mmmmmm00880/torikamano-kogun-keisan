@@ -10,13 +10,12 @@
 
 <div class="container">
     <h1>集結カウント計算</h1>
-    
-    <div class="formula-box">
-        <b>【計算公式】</b><br>
-        1. 基準値 = 全員の中で最大の(行軍 + 着弾秒)<br>
-        2. 待機秒 = 基準値 - (自分の行軍 + 目標の着弾秒)
-    </div>
-
+    <h2>各項目を入力すると「待機」にカウント数が出ます。<br>自分の数値になったら集結を出してください！<br>同着指定も可能です。</h2>
+    <h3>まず、全員の中で「出発から着弾までにかかる合計時間」が最も長い人を特定。<br>
+        基準値 = max(行軍時間+ 着弾秒)　<br>
+        基準値から、「行軍時間」と「目標の着弾秒」を差し引き。<br>
+        待機時間 = 基準値 - (行軍時間+ 目標の着弾秒)  
+    </h3>
     <div class="timer-display" id="mainTimer">-3</div>
 
     <div class="table-wrapper">
@@ -43,7 +42,7 @@
     <div class="copy-area" id="copyText"></div>
     <button class="btn btn-copy" onclick="copyText()">テキストをコピー</button>
     
-    <p class="notice">※データはブラウザに自動保存されます。</p>
+    <p class="notice">※ブラウザの履歴削除やキャッシュのクリアでデータが消える場合があります。シークレットモード不可。</p>
 </div>
 
 <script src="script.js"></script>
