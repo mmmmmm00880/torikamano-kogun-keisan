@@ -54,9 +54,17 @@ const mapData = [
     [0,0,0,0,0,66,0,0,0,0,66,0,0,0]
 ];
 
-window.addEventListener('DOMContentLoaded', () => {
+// マップを生成する関数を独立させる
+function generateMap() {
     const grid = document.getElementById('castleMap');
-    if(!grid) return;
+    if(!grid) {
+        // もし準備ができていなければ0.1秒後にやり直す
+        setTimeout(generateMap, 100);
+        return;
+    }
+
+    // 二重描画を防ぐために一度中身を空にする
+    grid.innerHTML = '';
 
     mapData.forEach(row => {
         row.forEach(val => {
@@ -74,6 +82,17 @@ window.addEventListener('DOMContentLoaded', () => {
                     calc(); // 再計算
                 };
             }
+            grid.appendChild(cell);
+        });
+    });
+}
+
+// 読み込み完了時に実行
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', generateMap);
+} else {
+    generateMap();
+}
             grid.appendChild(cell);
         });
     });
